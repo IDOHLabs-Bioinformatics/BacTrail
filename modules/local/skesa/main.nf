@@ -2,6 +2,11 @@ process SKESA {
     label 'process_high'
     tag '${meta.id}'
 
+    conda "${moduleDir}/environment.yml"
+    container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
+        'https://depot.galaxyproject.org/singularity/skesa:2.5.1--hdcf5f25_0' :
+        'biocontainers/skesa:2.5.1--hdcf5f25_0' }"
+
     input:
     tuple val(meta), path(reads)
 
