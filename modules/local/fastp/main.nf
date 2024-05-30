@@ -12,7 +12,12 @@ process FASTP {
     path(adapters)
 
     output:
-    tuple val(meta), path("*trimmed.fastq.gz")
+    tuple val(meta), path("*trimmed.fastq.gz"), emit: trimmed
+    tuple val(meta), path("*.json"),            emit: json
+    tuple val(meta), path("*.html"),            emit: html
+    tuple val(meta), path("version.yml"),       emit: version
+    tuple val(meta), path("*.log"),             emit: log
+
 
     when:
     task.ext.when == null || task.ext.when
@@ -25,13 +30,14 @@ process FASTP {
     fastp \\
         --in1 ${reads[0]} \\
         --in2 ${reads[1]} \\
-        --out1 ${meta}_1_trimmed.fastq.gz
-        --out2 ${meta}_2_trimmed.fastq.gz
-        ${adapt_arg}
-        --json ${meta}.json
-        --html ${meta}.html
-        --thread ${task.cpus}
-        ${args}
+        --out1 ${prefix}_1_trimmed.fastq.gz \\
+        --out2 ${prefix}_2_trimmed.fastq.gz \\
+        ${adapt_arg} \\
+        --json ${prefix}.json \\
+        --html ${prefix}.html \\
+        --thread ${task.cpus} \\
+        ${args} \\
+        2> ${prefix}.log
 
     cat << END_VERSIONS > version.yml
     "${task.process}":
@@ -39,12 +45,12 @@ process FASTP {
     """
 
     stub:
-    def args = task.ext.args ?: ''
+    def prefix = task.ext.prefix ?: "${meta.id}"
     """
-    touch ${meta}_1_trimmed.fastq.gz
-    touch ${meta}_2_trimmed.fastq.gz
-    touch ${meta}.json
-    touch ${meta}.html
+    touch ${prefix}_1_trimmed.fastq.gz
+    touch ${prefix}_2_trimmed.fastq.gz
+    touch ${prefix}.json
+    touch ${prefix}.html
 
     cat << END_VERSIONS > version.yml
     "${task.process}":
