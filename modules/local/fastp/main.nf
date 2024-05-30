@@ -55,5 +55,6 @@ process FASTP {
     cat << END_VERSIONS > version.yml
     "${task.process}":
         fastp: \$(fastp --version 2>&1 | sed -e "s/fastp //g")
+    END_VERSIONS
     """
 }
