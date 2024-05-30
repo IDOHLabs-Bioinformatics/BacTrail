@@ -43,5 +43,6 @@ process SKESA {
     cat << END_VERSIONS > version.yml
     "${task.process}":
         skesa: \$(skesa --version | sed -e "s/SKESA //g")
+    END_VERSIONS
     """
 }
