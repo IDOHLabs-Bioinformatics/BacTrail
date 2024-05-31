@@ -1,6 +1,6 @@
 process ALLELE_CALL {
     label "process_medium"
-    tag ${meta.id}
+    tag "Allele_call"
 
     conda "${moduleDir}/environment.yml"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
@@ -14,7 +14,8 @@ process ALLELE_CALL {
     // path(training_file) // is this needed at all? Use whats in the schema directory, and it should be constant then
 
     output:
-    tuple val(meta), path("*${organism}")
+    tuple val(meta), path("*${organism}"), emit: allele_call
+    path("version.yml"),                   emit: version
 
     when:
     task.ext.when == null || task.ext.when
@@ -22,7 +23,7 @@ process ALLELE_CALL {
     script:
     def args = task.ext.args ?: ''
     """
-    date=$(data +"%F")
+    date=\$(data +"%F")
 
     chewBBACA.py \\
         AlleleCall \\
