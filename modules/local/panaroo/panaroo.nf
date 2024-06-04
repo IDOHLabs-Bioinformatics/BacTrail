@@ -8,9 +8,11 @@ process PANAROO {
         'biocontainers/panaroo:1.5.0--pyhdfd78af_0' }"
 
     input:
-    path(assemblies)
+    path(gffs)
 
     output:
+    path("*_core_genome"), emit: core
+    path("version.yml"),   emit: version
 
     when:
     task.ext.when == null || task.ext.when
@@ -21,7 +23,7 @@ process PANAROO {
     today=\$(date +%F)
 
     panaroo \\
-        -i *.fasta \\
+        -i *.gff \\
         -o \$today_core_genome \\
         --clean-mode strict \\
         $args
