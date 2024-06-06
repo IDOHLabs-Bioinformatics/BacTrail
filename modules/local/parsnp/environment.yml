@@ -1,0 +1,6 @@
+name: parsnp
+channels:
+  - conda-forge
+  - bioconda
+dependencies:
+  - bioconda::parsnp=2.0.5
