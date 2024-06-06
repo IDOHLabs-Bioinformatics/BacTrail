@@ -47,6 +47,7 @@ workflow NFCORE_BACTRAIL {
 
     take:
     samplesheet // channel: samplesheet read in from --input
+    organisms   // channel: unique organisms in the samplesheet
 
     main:
 
@@ -54,7 +55,8 @@ workflow NFCORE_BACTRAIL {
     // WORKFLOW: Run pipeline
     //
     BACTRAIL (
-        samplesheet
+        samplesheet,
+        organisms
     )
 
     emit:
@@ -88,7 +90,8 @@ workflow {
     // WORKFLOW: Run main workflow
     //
     NFCORE_BACTRAIL (
-        PIPELINE_INITIALISATION.out.samplesheet
+        PIPELINE_INITIALISATION.out.samplesheet,
+        PIPELINE_INITIALISATION.out.organisms
     )
 
     //

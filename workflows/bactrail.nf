@@ -21,6 +21,7 @@ workflow BACTRAIL {
 
     take:
     ch_samplesheet // channel: samplesheet read in from --input
+    ch_organisms   // channel: unique organisms in the samplesheet
 
     main:
 

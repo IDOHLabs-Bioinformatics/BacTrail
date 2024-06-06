@@ -100,9 +100,14 @@ workflow PIPELINE_INITIALISATION {
         }
         .set { ch_samplesheet }
 
+    ch_samplesheet.map { it[0].org }
+        .unique()
+        .set {ch_organisms}
+
     emit:
     samplesheet = ch_samplesheet
     versions    = ch_versions
+    organisms   = ch_organisms
 }
 
 /*
