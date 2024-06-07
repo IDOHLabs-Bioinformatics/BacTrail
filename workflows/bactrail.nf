@@ -10,6 +10,7 @@ include { paramsSummaryMap       } from 'plugin/nf-validation'
 include { paramsSummaryMultiqc   } from '../subworkflows/nf-core/utils_nfcore_pipeline'
 include { softwareVersionsToYAML } from '../subworkflows/nf-core/utils_nfcore_pipeline'
 include { methodsDescriptionText } from '../subworkflows/local/utils_nfcore_bactrail_pipeline'
+include { DOWNLOAD_CHECK         } from '../modules/local/download_check.nf'
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -21,12 +22,19 @@ workflow BACTRAIL {
 
     take:
     ch_samplesheet // channel: samplesheet read in from --input
-    ch_organisms   // channel: unique organisms in the samplesheet
 
     main:
 
     ch_versions = Channel.empty()
     ch_multiqc_files = Channel.empty()
+
+    //
+    // MODULE
+    //
+    DOWNLOAD_CHECK (
+        ch_samplesheet.map { it[0].org }.unique(),
+        params.schema_dir
+    )
 
 
     //
