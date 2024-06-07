@@ -31,7 +31,7 @@
                 "type": "string",
                 "meta": ["org"],
                 "pattern": "^\\S+$",
-                "errorMessage": "Organism must be provided with '_' replacing any spaces."
+                "errorMessage": "The unabbreviated organism name must be provided with '_' replacing any spaces."
             }
         },
         "required": ["sample", "fastq_1", "organism"]

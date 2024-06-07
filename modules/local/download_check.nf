@@ -25,7 +25,7 @@ process DOWNLOAD_CHECK {
           break
         fi
       done
-    echo \$result
+    printf "%s" \$result
     """
 
     stub:
