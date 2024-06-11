@@ -1,6 +1,6 @@
 name: skesa
 channels:
-  -conda-forge
-  -bioconda
+  - conda-forge
+  - bioconda
 dependencies:
-  -bioconda::skesa=2.5.1
+  - bioconda::skesa=2.5.1

@@ -1,6 +1,6 @@
 name: snippy
 channels:
-  -conda-forge
-  -bioconda
+  - conda-forge
+  - bioconda
 dependencies:
-  -bioconda::snippy=4.6.0
+  - bioconda::snippy=4.6.0

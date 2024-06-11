@@ -1,6 +1,6 @@
 name: chewBBACA
 channels:
-  -conda-forge
-  -bioconda
+  - conda-forge
+  - bioconda
 dependencies:
-  -bioconda::chewBBACA=3.3.5
+  - bioconda::chewBBACA=3.3.5
