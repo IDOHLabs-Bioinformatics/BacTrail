@@ -28,7 +28,7 @@ process PROKKA {
     task.ext.when == null || task.ext.when
 
     script:
-    def prefix = task.ext.prefix ?: ${meta.id}
+    def prefix = task.ext.prefix ?: "${meta.id}""
     def args = task.ext.args ?: ''
     """
     prokka \\

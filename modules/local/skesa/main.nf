@@ -20,7 +20,7 @@ process SKESA {
 
     script:
     def args = task.ext.args ?: ''
-    def prefix = ${meta.id}
+    def prefix = task.ext.prefix = "${meta.id}"
     """
     skesa \\
         --reads ${reads[0]},${reads[1]} \\
