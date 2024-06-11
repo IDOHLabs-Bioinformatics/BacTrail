@@ -11,7 +11,7 @@ process SCHEMA_DOWNLOAD {
     val(organism)
 
     output:
-    path("${organism}/*"), emit: schema
+    path("${organism}/*"), emit: schema, optional: true
     path("version.yml"),   emit: version
 
     when:
@@ -21,15 +21,15 @@ process SCHEMA_DOWNLOAD {
     def args = task.ext.args ?: ''
     """
     species_id=\$(python ${projectDir}/bin/schema_ids.py -o ${organism})
-
-    chewBBACA.py \\
-        DownloadSchema \\
-        -sp \$species_id \\
-        -sc 1 \\
-        -o ${organism} \\
-        --cpu ${task.cpus} \\
-        ${args}
-
+    if [ \$species_id != "" ]; then
+        chewBBACA.py \\
+            DownloadSchema \\
+            -sp \$species_id \\
+            -sc 1 \\
+            -o ${organism} \\
+            --cpu ${task.cpus} \\
+            ${args}
+    fi
     cat << END_VERSIONS > version.yml
     "${task.process}":
         chewBBACA: \$(chewBBACA.py -v | sed -e "s/chewBBACA version: //g")

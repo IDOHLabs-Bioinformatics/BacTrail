@@ -14,6 +14,8 @@ def parse_args():
 if __name__ == '__main__':
     # initialize variables
     organism = parse_args()
+    organism = organism.replace('_', ' ')
+    result = ''
     species_id_url = 'https://chewbbaca.online/NS/api/species/list'
 
     # get species id
@@ -21,5 +23,7 @@ if __name__ == '__main__':
     data = json.loads(id_json.text)
     for entry in data:
         if entry['name']['value'] == organism:
-            print(entry['species']['value'][-1])
+            result = entry['species']['value'][-1]
             break
+
+    print(result)
