@@ -11,6 +11,7 @@ include { paramsSummaryMultiqc   } from '../subworkflows/nf-core/utils_nfcore_pi
 include { softwareVersionsToYAML } from '../subworkflows/nf-core/utils_nfcore_pipeline'
 include { methodsDescriptionText } from '../subworkflows/local/utils_nfcore_bactrail_pipeline'
 include { DOWNLOAD_CHECK         } from '../modules/local/download_check.nf'
+include { SCHEMA_DOWNLOAD        } from '../modules/local/chewBBACA/SchemaDownload.nf'
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -29,13 +30,19 @@ workflow BACTRAIL {
     ch_multiqc_files = Channel.empty()
 
     //
-    // MODULE
+    // MODULE: Download check
     //
     DOWNLOAD_CHECK (
         ch_samplesheet.map { it[0].org }.unique(),
         params.schema_dir
     )
 
+    //
+    // MODULE: Download schema from Chewie-NS
+    //
+    SCHEMA_DOWNLOAD (
+        DOWNLOAD_CHECK.out.filter{ it != ''}
+    )
 
     //
     // Collate and save software versions
