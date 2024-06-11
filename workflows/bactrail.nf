@@ -47,6 +47,14 @@ workflow BACTRAIL {
     )
 
     //
+    // MODULE: Snippy
+    //
+    SNIPPY (
+        ch_samplesheet,
+        ch_reference.first()
+    )
+
+    //
     // Collate and save software versions
     //
     softwareVersionsToYAML(ch_versions)
