@@ -46,6 +46,12 @@
                     "format": "directory-path",
                     "description": "The directory which contains the schemas for chewBBACA. This same path should be used for all runs of BacTrail.",
                     "fa_icon": "fas fa-folder-open"
+                },
+                "reference": {
+                    "type": "string",
+                    "format": "file-path",
+                    "exists": true,
+                    "description": "Path to the reference genome in fasta format for the input samples."
                 }
             }
         },

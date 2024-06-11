@@ -12,6 +12,7 @@ include { softwareVersionsToYAML } from '../subworkflows/nf-core/utils_nfcore_pi
 include { methodsDescriptionText } from '../subworkflows/local/utils_nfcore_bactrail_pipeline'
 include { DOWNLOAD_CHECK         } from '../modules/local/download_check.nf'
 include { SCHEMA_DOWNLOAD        } from '../modules/local/chewBBACA/SchemaDownload.nf'
+include { SNIPPY                 } from '../modules/local/snippy/snippy.nf'
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -23,6 +24,7 @@ workflow BACTRAIL {
 
     take:
     ch_samplesheet // channel: samplesheet read in from --input
+    ch_reference
 
     main:
 

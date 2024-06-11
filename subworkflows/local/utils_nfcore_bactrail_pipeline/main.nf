@@ -36,6 +36,7 @@ workflow PIPELINE_INITIALISATION {
     nextflow_cli_args //   array: List of positional nextflow CLI args
     outdir            //  string: The output directory where the results will be saved
     input             //  string: Path to input samplesheet
+    reference         //  string: Path to the reference genome
 
     main:
 
@@ -100,9 +101,14 @@ workflow PIPELINE_INITIALISATION {
         }
         .set { ch_samplesheet }
 
+    //
+    // Create channel from reference
+    //
+    Channel.fromPath(reference, checkIfExists: true).set{ ch_reference }
 
     emit:
     samplesheet = ch_samplesheet
+    reference   = ch_reference
     versions    = ch_versions
 }
 

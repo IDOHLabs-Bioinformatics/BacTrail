@@ -47,6 +47,7 @@ workflow NFCORE_BACTRAIL {
 
     take:
     samplesheet // channel: samplesheet read in from --input
+    reference   // channel: reference genome read in from --reference
 
     main:
 
@@ -54,7 +55,8 @@ workflow NFCORE_BACTRAIL {
     // WORKFLOW: Run pipeline
     //
     BACTRAIL (
-        samplesheet
+        samplesheet,
+        reference
     )
 
     emit:
@@ -81,14 +83,16 @@ workflow {
         params.monochrome_logs,
         args,
         params.outdir,
-        params.input
+        params.input,
+        params.reference
     )
 
     //
     // WORKFLOW: Run main workflow
     //
     NFCORE_BACTRAIL (
-        PIPELINE_INITIALISATION.out.samplesheet
+        PIPELINE_INITIALISATION.out.samplesheet,
+        PIPELINE_INITIALISATION.out.reference
     )
 
     //
