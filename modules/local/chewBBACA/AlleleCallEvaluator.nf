@@ -22,13 +22,11 @@ process ALLELE_CALL_EVALUATOR {
     script:
     def args = task.ext.args ?: ''
     """
-    date=\$(date +"%F")
-
     chewBBACA.py \\
         AlleleCallEvaluator \\
         --input-files ${allele_results} \\
         --schema-directory ${schema} \\
-        --output-directory \$date_${organism}
+        --output-directory \$(date +"%F")_${organism}
         --cpu ${task.cpus} \\
         ${args}
 
@@ -40,6 +38,7 @@ process ALLELE_CALL_EVALUATOR {
 
     stub:
     """
+    mkdir \$(date +"%F")_${organism}
     cat << VERSIONS_END > version.yml
     "${task.process}":
         chewBBACA: \$(chewBBACA.py -v | sed -e "s/chewBBACA version: //g")
