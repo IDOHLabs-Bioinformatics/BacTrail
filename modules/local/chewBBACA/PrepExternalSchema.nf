@@ -24,7 +24,7 @@ process PREP_EXTERNAL_SCHEMA {
         PrepExternalSchema \\
         --schema-directory ${schema} \\
         --output-directory ${organism}_schema \\
-        --cpu ${task.cpu} \\
+        --cpu ${task.cpus} \\
         ${args}
 
     cat << END_VERSIONS > version.yml
