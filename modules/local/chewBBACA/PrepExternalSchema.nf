@@ -11,8 +11,8 @@ process PREP_EXTERNAL_SCHEMA {
     tuple val(organism), path(schema)
 
     output:
-    path("${organism}_schema"), emit: schema
-    path("version.yml"),        emit: version
+    tuple val(organism), path("${organism}_schema"), emit: schema
+    path("version.yml"),                             emit: version
 
     when:
     task.ext.when == null || task.ext.when
