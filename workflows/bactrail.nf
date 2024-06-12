@@ -13,6 +13,7 @@ include { methodsDescriptionText } from '../subworkflows/local/utils_nfcore_bact
 include { DOWNLOAD_CHECK         } from '../modules/local/download_check.nf'
 include { SCHEMA_DOWNLOAD        } from '../modules/local/chewBBACA/SchemaDownload.nf'
 include { SNIPPY                 } from '../modules/local/snippy/snippy.nf'
+include { PREP_EXTERNAL_SCHEMA   } from '../modules/local/chewBBACA/PrepExternalSchema.nf'
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -44,6 +45,13 @@ workflow BACTRAIL {
     //
     SCHEMA_DOWNLOAD (
         DOWNLOAD_CHECK.out.filter{ it != ''}
+    )
+
+    //
+    // MODULE: PrepExternalSchema
+    //
+    PREP_EXTERNAL_SCHEMA (
+        SCHEMA_DOWNLOAD.out.schema
     )
 
     //
