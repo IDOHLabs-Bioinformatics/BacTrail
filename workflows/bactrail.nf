@@ -15,6 +15,7 @@ include { SCHEMA_DOWNLOAD        } from '../modules/local/chewBBACA/SchemaDownlo
 include { SNIPPY                 } from '../modules/local/snippy/snippy.nf'
 include { PREP_EXTERNAL_SCHEMA   } from '../modules/local/chewBBACA/PrepExternalSchema.nf'
 include { SKESA                  } from '../modules/local/skesa/skesa.nf'
+include { ALLELE_CALL            } from '../modules/local/chewBBACA/AlleleCall.nf'
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -61,6 +62,15 @@ workflow BACTRAIL {
     //
     SKESA (
         ch_samplesheet
+    )
+
+    //
+    // MODULE: Allele Call
+    //
+    ALLELE_CALL (
+        SKESA.out.org_assembly |
+            groupTuple() |
+            join(PREP_EXTERNAL_SCHEMA.out.schema)
     )
 
     //
