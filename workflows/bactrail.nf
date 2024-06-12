@@ -14,6 +14,7 @@ include { DOWNLOAD_CHECK         } from '../modules/local/download_check.nf'
 include { SCHEMA_DOWNLOAD        } from '../modules/local/chewBBACA/SchemaDownload.nf'
 include { SNIPPY                 } from '../modules/local/snippy/snippy.nf'
 include { PREP_EXTERNAL_SCHEMA   } from '../modules/local/chewBBACA/PrepExternalSchema.nf'
+include { SKESA                  } from '../modules/local/skesa/skesa.nf'
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -52,6 +53,14 @@ workflow BACTRAIL {
     //
     PREP_EXTERNAL_SCHEMA (
         SCHEMA_DOWNLOAD.out.schema
+    )
+
+
+    //
+    // MODULE: SKESA
+    //
+    SKESA (
+        ch_samplesheet
     )
 
     //
