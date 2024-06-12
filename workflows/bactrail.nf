@@ -16,6 +16,7 @@ include { SNIPPY                 } from '../modules/local/snippy/snippy.nf'
 include { PREP_EXTERNAL_SCHEMA   } from '../modules/local/chewBBACA/PrepExternalSchema.nf'
 include { SKESA                  } from '../modules/local/skesa/skesa.nf'
 include { ALLELE_CALL            } from '../modules/local/chewBBACA/AlleleCall.nf'
+include { ALLELE_CALL_EVALUATOR  } from '../modules/local/chewBBACA/AlleleCallEvaluator.nf'
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -71,6 +72,13 @@ workflow BACTRAIL {
         SKESA.out.org_assembly |
             groupTuple() |
             join(PREP_EXTERNAL_SCHEMA.out.schema)
+    )
+
+    //
+    // MODULE: Allele Call Evaluator
+    //
+    ALLELE_CALL_EVALUATOR (
+        ALLELE_CALL.out.dir
     )
 
     //
