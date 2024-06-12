@@ -8,12 +8,10 @@ process ALLELE_CALL_EVALUATOR {
         'biocontainers/chewBBACA:3.3.5--pyhdfd78af_0' }"
 
     input:
-    path(allele_results)
-    path(schema)
-    path(organism)
+    tuple val(organism), path(schema), path(allele_call)
 
     output:
-    path("*_${organism}")
+    path("*_${organism}_eval")
     path("version.yml"), emit: version
 
     when:
@@ -24,9 +22,9 @@ process ALLELE_CALL_EVALUATOR {
     """
     chewBBACA.py \\
         AlleleCallEvaluator \\
-        --input-files ${allele_results} \\
+        --input-files ${allele_call} \\
         --schema-directory ${schema} \\
-        --output-directory \$(date +"%F")_${organism}
+        --output-directory \$(date +"%F")_${organism}_eval \\
         --cpu ${task.cpus} \\
         ${args}
 
