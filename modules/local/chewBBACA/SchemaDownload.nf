@@ -11,7 +11,7 @@ process SCHEMA_DOWNLOAD {
     val(organism)
 
     output:
-    path("${organism}/*"), emit: schema, optional: true
+    tuple val("${organism}"), path("${organism}/*"), emit: schema, optional: true
     path("version.yml"),   emit: version
 
     when:
