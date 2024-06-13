@@ -11,31 +11,32 @@ process PROKKA {
     tuple val(meta), path(assembly)
 
     output:
-    tuple val(meta), path("${prefix}/*.gff"), emit: gff
-    tuple val(meta), path("${prefix}/*.err"), emit: err
-    tuple val(meta), path("${prefix}/*.faa"), emit: faa
-    tuple val(meta), path("${prefix}/*.fna"), emit: fna
-    tuple val(meta), path("${prefix}/*.fsa"), emit: fsa
-    tuple val(meta), path("${prefix}/*.gbk"), emit: gbk
-    tuple val(meta), path("${prefix}/*.sqn"), emit: sqn
-    tuple val(meta), path("${prefix}/*.tbl"), emit: tbl
-    tuple val(meta), path("${prefix}/*.tsv"), emit: tsv
-    tuple val(meta), path("${prefix}/*.txt"), emit: txt
-    tuple val(meta), path("${prefix}/*.log"), emit: log
+    tuple val(meta), path("${meta.id}/*.gff"), emit: gff
+    tuple val(meta), path("${meta.id}/*.err"), emit: err
+    tuple val(meta), path("${meta.id}/*.faa"), emit: faa
+    tuple val(meta), path("${meta.id}/*.fna"), emit: fna
+    tuple val(meta), path("${meta.id}/*.fsa"), emit: fsa
+    tuple val(meta), path("${meta.id}/*.gbk"), emit: gbk
+    tuple val(meta), path("${meta.id}/*.sqn"), emit: sqn
+    tuple val(meta), path("${meta.id}/*.tbl"), emit: tbl
+    tuple val(meta), path("${meta.id}/*.tsv"), emit: tsv
+    tuple val(meta), path("${meta.id}/*.txt"), emit: txt
+    tuple val(meta), path("${meta.id}/*.log"), emit: log
     path("version.yml")
 
     when:
     task.ext.when == null || task.ext.when
 
     script:
-    def prefix = task.ext.prefix ?: "${meta.id}""
+    def prefix = task.ext.prefix ?: "${meta.id}"
     def args = task.ext.args ?: ''
     """
     prokka \\
         --prefix ${prefix} \\
         --outdir ${prefix} \\
         --cpus ${task.cpus} \\
-        ${args}
+        ${args} \\
+        ${assembly}
 
     cat << END_VERSIONS > version.yml
     "${task.process}":
@@ -46,17 +47,17 @@ process PROKKA {
     stub:
     def prefix = task.ext.prefix ?: ${meta.id}
     """
-    touch ${prefix}/empty.gff
-    touch ${prefix}/empty.err
-    touch ${prefix}/empty.faa
-    touch ${prefix}/empty.fna
-    touch ${prefix}/empty.fsa
-    touch ${prefix}/empty.gbk
-    touch ${prefix}/empty.sqn
-    touch ${prefix}/empty.tbl
-    touch ${prefix}/empty.tsv
-    touch ${prefix}/empty.txt
-    touch ${prefix}/empty.log
+    touch ${meta.id}/empty.gff
+    touch ${meta.id}/empty.err
+    touch ${meta.id}/empty.faa
+    touch ${meta.id}/empty.fna
+    touch ${meta.id}/empty.fsa
+    touch ${meta.id}/empty.gbk
+    touch ${meta.id}/empty.sqn
+    touch ${meta.id}/empty.tbl
+    touch ${meta.id}/empty.tsv
+    touch ${meta.id}/empty.txt
+    touch ${meta.id}/empty.log
 
 
     cat << END_VERSIONS > version.yml
