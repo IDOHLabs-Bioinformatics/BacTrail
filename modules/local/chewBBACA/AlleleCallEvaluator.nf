@@ -11,8 +11,8 @@ process ALLELE_CALL_EVALUATOR {
     tuple val(organism), path(schema), path(allele_call)
 
     output:
-    path("*_${organism}_eval")
-    path("version.yml"), emit: version
+    path("*_${organism}_eval"), emit: eval
+    path("version.yml"),        emit: version
 
     when:
     task.ext.when == null || task.ext.when
