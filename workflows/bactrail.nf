@@ -17,6 +17,7 @@ include { PREP_EXTERNAL_SCHEMA   } from '../modules/local/chewBBACA/PrepExternal
 include { SKESA                  } from '../modules/local/skesa/skesa.nf'
 include { ALLELE_CALL            } from '../modules/local/chewBBACA/AlleleCall.nf'
 include { ALLELE_CALL_EVALUATOR  } from '../modules/local/chewBBACA/AlleleCallEvaluator.nf'
+include { PROKKA                 } from '../modules/local/prokka/prokka.nf'
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -57,7 +58,6 @@ workflow BACTRAIL {
         SCHEMA_DOWNLOAD.out.schema
     )
 
-
     //
     // MODULE: SKESA
     //
@@ -79,6 +79,13 @@ workflow BACTRAIL {
     //
     ALLELE_CALL_EVALUATOR (
         ALLELE_CALL.out.dir
+    )
+
+    //
+    // MODULE: Prokka
+    //
+    PROKKA (
+        SKESA.out.assembly
     )
 
     //
