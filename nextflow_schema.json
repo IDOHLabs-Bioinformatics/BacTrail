@@ -52,6 +52,11 @@
                     "format": "file-path",
                     "exists": true,
                     "description": "Path to the reference genome in fasta format for the input samples."
+                },
+                "db_name": {
+                    "type": "string",
+                    "format": "file-path",
+                    "description": "Path to the database containing intermediate results. Will be created if not present."
                 }
             }
         },
