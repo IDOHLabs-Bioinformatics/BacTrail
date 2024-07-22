@@ -18,6 +18,7 @@ include { SKESA                  } from '../modules/local/skesa/skesa.nf'
 include { ALLELE_CALL            } from '../modules/local/chewBBACA/AlleleCall.nf'
 include { ALLELE_CALL_EVALUATOR  } from '../modules/local/chewBBACA/AlleleCallEvaluator.nf'
 include { PROKKA                 } from '../modules/local/prokka/prokka.nf'
+include { UPDATE_DB              } from '../modules/local/database/update_db.nf'
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -94,6 +95,17 @@ workflow BACTRAIL {
     SNIPPY (
         ch_samplesheet,
         ch_reference.first()
+    )
+
+    updating_ch = ch_samplesheet
+                    .join(SKESA.out.assembly)
+                    .join(PROKKA.out.gff)
+                    .join(SNIPPY.out.aligned)
+                    .join(SNIPPY.out.vcf).view()
+
+    UPDATE_DB (
+        updating_ch,
+        params.db_name
     )
 
     //
