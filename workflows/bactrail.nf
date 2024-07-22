@@ -101,7 +101,7 @@ workflow BACTRAIL {
                     .join(SKESA.out.assembly)
                     .join(PROKKA.out.gff)
                     .join(SNIPPY.out.aligned)
-                    .join(SNIPPY.out.vcf).view()
+                    .join(SNIPPY.out.vcf)
 
     UPDATE_DB (
         updating_ch,
