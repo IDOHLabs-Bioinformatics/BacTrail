@@ -4,6 +4,14 @@ import sqlite3
 from contextlib import closing
 
 
+def contents(path):
+    with open(path, 'r') as infile:
+        data = infile.readlines()
+        data = '\n'.join(data)
+
+    return data
+
+
 def check_table(c):
     tables = c.execute("SELECT name FROM sqlite_master WHERE type='table'").fetchall()
     print(tables)
@@ -44,8 +52,9 @@ if __name__ == '__main__':
                 "CREATE TABLE intermediate (ID TEXT, organism TEXT, assembly TEXT, gff TEXT, aligned TEXT, vcf TEXT)")
 
         # test insert
-        cursor.execute("INSERT INTO intermediate VALUES (?, ?, ?, ?, ?, ?)", (args.id, args.organism, args.assembly,
-                                                                              args.gff, args.fasta, args.vcf))
+        cursor.execute("INSERT INTO intermediate VALUES (?, ?, ?, ?, ?, ?)",
+                       (args.id, args.organism, contents(args.assembly),
+                        contents(args.gff), contents(args.fasta), contents(args.vcf)))
 
         # save the updates
         conn.commit()
