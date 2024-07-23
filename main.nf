@@ -17,11 +17,14 @@ nextflow.enable.dsl = 2
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
 
-include { BACTRAIL  } from './workflows/bactrail'
-include { PIPELINE_INITIALISATION } from './subworkflows/local/utils_nfcore_bactrail_pipeline'
-include { PIPELINE_COMPLETION     } from './subworkflows/local/utils_nfcore_bactrail_pipeline'
+include { BACTRAIL_ADD                    } from './workflows/bactrail_add'
+include { PIPELINE_INITIALISATION_ADD     } from './subworkflows/local/utils_nfcore_bactrail_pipeline'
+include { PIPELINE_INITIALISATION_ANALYZE } from './subworkflows/local/utils_nfcore_bactrail_pipeline'
+include { PIPELINE_COMPLETION_ADD         } from './subworkflows/local/utils_nfcore_bactrail_pipeline'
+include { PIPELINE_COMPLETION_ANALYZE     } from './subworkflows/local/utils_nfcore_bactrail_pipeline'
 
-include { getGenomeAttribute      } from './subworkflows/local/utils_nfcore_bactrail_pipeline'
+
+include { getGenomeAttribute              } from './subworkflows/local/utils_nfcore_bactrail_pipeline'
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -41,9 +44,9 @@ params.fasta = getGenomeAttribute('fasta')
 */
 
 //
-// WORKFLOW: Run main analysis pipeline depending on type of input
+// WORKFLOW: Run database adding pipeline depending on type of input
 //
-workflow NFCORE_BACTRAIL {
+workflow NFCORE_BACTRAIL_ADD {
 
     take:
     samplesheet // channel: samplesheet read in from --input
@@ -54,13 +57,24 @@ workflow NFCORE_BACTRAIL {
     //
     // WORKFLOW: Run pipeline
     //
-    BACTRAIL (
+    BACTRAIL_ADD (
         samplesheet,
         reference
     )
 
     emit:
-    multiqc_report = BACTRAIL.out.multiqc_report // channel: /path/to/multiqc_report.html
+    multiqc_report = BACTRAIL_ADD.out.multiqc_report // channel: /path/to/multiqc_report.html
+
+}
+
+//
+// WORKFLOW: Run analysis pipeline depending on type of input
+//
+workflow NFCORE_BACTRAIL_ANALYZE {
+
+    main:
+
+    println("analyze")
 
 }
 /*
@@ -76,37 +90,68 @@ workflow {
     //
     // SUBWORKFLOW: Run initialisation tasks
     //
-    PIPELINE_INITIALISATION (
-        params.version,
-        params.help,
-        params.validate_params,
-        params.monochrome_logs,
-        args,
-        params.outdir,
-        params.input,
-        params.reference
-    )
+    if (params.mode == 'add') {
+        PIPELINE_INITIALISATION_ADD (
+            params.version,
+            params.help,
+            params.validate_params,
+            params.monochrome_logs,
+            args,
+            params.outdir,
+            params.input,
+            params.reference
+        )
 
-    //
-    // WORKFLOW: Run main workflow
-    //
-    NFCORE_BACTRAIL (
-        PIPELINE_INITIALISATION.out.samplesheet,
-        PIPELINE_INITIALISATION.out.reference
-    )
+        //
+        // WORKFLOW: Run main workflow
+        //
+        NFCORE_BACTRAIL_ADD (
+            PIPELINE_INITIALISATION_ADD.out.samplesheet,
+            PIPELINE_INITIALISATION_ADD.out.reference
+        )
 
-    //
-    // SUBWORKFLOW: Run completion tasks
-    //
-    PIPELINE_COMPLETION (
-        params.email,
-        params.email_on_fail,
-        params.plaintext_email,
-        params.outdir,
-        params.monochrome_logs,
-        params.hook_url,
-        NFCORE_BACTRAIL.out.multiqc_report
-    )
+        //
+        // SUBWORKFLOW: Run completion tasks
+        //
+        PIPELINE_COMPLETION_ADD (
+            params.email,
+            params.email_on_fail,
+            params.plaintext_email,
+            params.outdir,
+            params.monochrome_logs,
+            params.hook_url,
+            NFCORE_BACTRAIL_ADD.out.multiqc_report
+        )
+    }
+    else {
+        PIPELINE_INITIALISATION_ANALYZE (
+            params.version,
+            params.help,
+            params.validate_params,
+            params.monochrome_logs,
+            args,
+            params.outdir
+        )
+
+        //
+        // WORKFLOW: Run main workflow
+        //
+        NFCORE_BACTRAIL_ANALYZE (
+        )
+
+        //
+        // SUBWORKFLOW: Run completion tasks
+        //
+        PIPELINE_COMPLETION_ANALYZE (
+            params.email,
+            params.email_on_fail,
+            params.plaintext_email,
+            params.outdir,
+            params.monochrome_logs,
+            params.hook_url
+        )
+    }
+
 }
 
 /*

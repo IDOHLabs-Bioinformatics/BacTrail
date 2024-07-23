@@ -26,7 +26,7 @@ include { UPDATE_DB              } from '../modules/local/database/update_db.nf'
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
 
-workflow BACTRAIL {
+workflow BACTRAIL_ADD {
 
     take:
     ch_samplesheet // channel: samplesheet read in from --input

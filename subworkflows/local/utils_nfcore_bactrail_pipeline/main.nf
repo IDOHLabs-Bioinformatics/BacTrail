@@ -22,11 +22,11 @@ include { workflowCitation          } from '../../nf-core/utils_nfcore_pipeline'
 
 /*
 ========================================================================================
-    SUBWORKFLOW TO INITIALISE PIPELINE
+    SUBWORKFLOW TO INITIALISE PIPELINE FOR ADD
 ========================================================================================
 */
 
-workflow PIPELINE_INITIALISATION {
+workflow PIPELINE_INITIALISATION_ADD {
 
     take:
     version           // boolean: Display version and exit
@@ -64,7 +64,7 @@ workflow PIPELINE_INITIALISATION {
         pre_help_text,
         post_help_text,
         validate_params,
-        "nextflow_schema.json"
+        "nextflow_schema_add.json"
     )
 
     //
@@ -114,11 +114,73 @@ workflow PIPELINE_INITIALISATION {
 
 /*
 ========================================================================================
-    SUBWORKFLOW FOR PIPELINE COMPLETION
+    SUBWORKFLOW TO INITIALISE PIPELINE FOR ANALYZE
 ========================================================================================
 */
 
-workflow PIPELINE_COMPLETION {
+workflow PIPELINE_INITIALISATION_ANALYZE {
+
+    take:
+    version           // boolean: Display version and exit
+    help              // boolean: Display help text
+    validate_params   // boolean: Boolean whether to validate parameters against the schema at runtime
+    monochrome_logs   // boolean: Do not use coloured log outputs
+    nextflow_cli_args //   array: List of positional nextflow CLI args
+    outdir            //  string: The output directory where the results will be saved
+
+    main:
+
+    ch_versions = Channel.empty()
+
+    //
+    // Print version and exit if required and dump pipeline parameters to JSON file
+    //
+    UTILS_NEXTFLOW_PIPELINE (
+        version,
+        true,
+        outdir,
+        workflow.profile.tokenize(',').intersect(['conda', 'mamba']).size() >= 1
+    )
+
+    //
+    // Validate parameters and generate parameter summary to stdout
+    //
+    pre_help_text = nfCoreLogo(monochrome_logs)
+    post_help_text = '\n' + workflowCitation() + '\n' + dashedLine(monochrome_logs)
+    def String workflow_command = "nextflow run ${workflow.manifest.name} -profile <docker/singularity/.../institute> --input samplesheet.csv --outdir <OUTDIR>"
+    UTILS_NFVALIDATION_PLUGIN (
+        help,
+        workflow_command,
+        pre_help_text,
+        post_help_text,
+        validate_params,
+        "nextflow_schema_analyze.json"
+    )
+
+    //
+    // Check config provided to the pipeline
+    //
+    UTILS_NFCORE_PIPELINE (
+        nextflow_cli_args
+    )
+
+    //
+    // Custom validation for pipeline parameters
+    //
+    validateInputParameters()
+
+
+    emit:
+    versions    = ch_versions
+}
+
+/*
+========================================================================================
+    SUBWORKFLOW FOR PIPELINE ADD COMPLETION
+========================================================================================
+*/
+
+workflow PIPELINE_COMPLETION_ADD {
 
     take:
     email           //  string: email address
@@ -128,6 +190,43 @@ workflow PIPELINE_COMPLETION {
     monochrome_logs // boolean: Disable ANSI colour codes in log output
     hook_url        //  string: hook URL for notifications
     multiqc_report  //  string: Path to MultiQC report
+
+    main:
+
+    summary_params = paramsSummaryMap(workflow, parameters_schema: "nextflow_schema.json")
+
+    //
+    // Completion email and summary
+    //
+    workflow.onComplete {
+        if (email || email_on_fail) {
+            completionEmail(summary_params, email, email_on_fail, plaintext_email, outdir, monochrome_logs, multiqc_report.toList())
+        }
+
+        completionSummary(monochrome_logs)
+
+        if (hook_url) {
+            imNotification(summary_params, hook_url)
+        }
+    }
+}
+
+
+/*
+========================================================================================
+    SUBWORKFLOW FOR PIPELINE ANALYZE COMPLETION
+========================================================================================
+*/
+
+workflow PIPELINE_COMPLETION_ANALYZE {
+
+    take:
+    email           //  string: email address
+    email_on_fail   //  string: email address sent on pipeline failure
+    plaintext_email // boolean: Send plain-text email instead of HTML
+    outdir          //    path: Path to output directory where results will be published
+    monochrome_logs // boolean: Disable ANSI colour codes in log output
+    hook_url        //  string: hook URL for notifications
 
     main:
 
