@@ -3,34 +3,27 @@ process DOWNLOAD_CHECK {
     tag "check"
 
     input:
-    val(meta)
+    val(organism)
     val(schemas)
 
     output:
-    stdout
+    tuple val(organism), env(need),  emit: needed
+    tuple val(organism), env(avail), emit: available
 
     when:
     task.ext.when == null || task.ext.when
 
-    shell:
+    script:
     """
-    cd !{schemas}
-    for file in *
-      do
-        compare=\$(echo \$file | awk -F '_' '{print\$1 "_" \$2}')
-        if [ "\$compare" != "!{meta}" ]; then
-          result=!{meta}
-        else
-          result=""
-          break
-        fi
-      done
-    printf "%s" \$result
+    need=\$(python ${projectDir}/bin/download_check.py -t ${organism} -s ${schemas} 2> err.tmp)
+    avail=\$(cat err.tmp)
+    rm err.tmp
     """
 
     stub:
     """
-    echo ''
+    need=\$(echo '')
+    avail=\$(echo '')
     """
 
 }
