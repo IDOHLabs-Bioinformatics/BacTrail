@@ -10,7 +10,7 @@
             "type": "object",
             "fa_icon": "fas fa-terminal",
             "description": "Define where the pipeline should find input data and save output data.",
-            "required": ["input", "outdir"],
+            "required": ["input", "outdir", "mode"],
             "properties": {
                 "input": {
                     "type": "string",
@@ -57,6 +57,11 @@
                     "type": "string",
                     "format": "file-path",
                     "description": "Path to the database containing intermediate results. Will be created if not present."
+                },
+                "mode":{
+                    "type": "string",
+                    "description": "Select which mode to use, either 'add' or 'analyze'.",
+                    "pattern": "add|analyze"
                 }
             }
         },
