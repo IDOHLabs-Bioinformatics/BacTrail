@@ -11,10 +11,10 @@ process SKESA {
     tuple val(meta), path(reads)
 
     output:
-    tuple val(meta), path("*.fasta"),     emit: assembly
-    tuple val(meta.org), path("*.fasta"), emit: org_assembly
-    tuple val(meta), path("*.log"),       emit: log
-    path("version.yml"),                  emit: version
+    tuple val(meta), path("*.fasta"),                emit: assembly
+    tuple val(meta.org), val(meta), path("*.fasta"), emit: org_assembly
+    tuple val(meta), path("*.log"),                  emit: log
+    path("version.yml"),                             emit: version
 
     when:
     task.ext.when == null || task.ext.when
