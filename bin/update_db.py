@@ -14,10 +14,8 @@ def contents(path):
 
 def check_table(c):
     tables = c.execute("SELECT name FROM sqlite_master WHERE type='table'").fetchall()
-    print(tables)
 
     if ('intermediate',) in tables:
-        print('here')
         return True
     else:
         return False
