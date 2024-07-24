@@ -8,9 +8,10 @@ process ALLELE_CALL {
         'biocontainers/chewBBACA:3.3.5--pyhdfd78af_0' }"
 
     input:
-    tuple val(organism), path(assemblies), path(schema)
-
-    // path(training_file) // is this needed at all? Use whats in the schema directory, and it should be constant then
+    val(meta)
+    path(assemblies)
+    path(schema)
+    val(organism)
 
     output:
     tuple val(organism), path(schema), path("*${organism}"), emit: dir
@@ -36,7 +37,7 @@ process ALLELE_CALL {
     chewBBACA.py \\
         AlleleCall \\
         --input-files . \\
-        --schema-directory ${schema} \\
+        --schema-directory ${schema[0]} \\
         --output-directory \$(date +"%F")_${organism} \\
         --cpu-cores ${task.cpus} \\
         ${args}

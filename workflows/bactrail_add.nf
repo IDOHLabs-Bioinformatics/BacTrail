@@ -49,7 +49,7 @@ workflow BACTRAIL_ADD {
     // MODULE: Download schema from Chewie-NS
     //
     SCHEMA_DOWNLOAD (
-        DOWNLOAD_CHECK.out.filter{ it != ''}
+        DOWNLOAD_CHECK.out.needed.filter{ it[1] != ''}
     )
 
     //
@@ -69,10 +69,20 @@ workflow BACTRAIL_ADD {
     //
     // MODULE: Allele Call
     //
+    locations = DOWNLOAD_CHECK.out.available.concat(PREP_EXTERNAL_SCHEMA.out.schema)
+    SKESA.out.org_assembly
+            .combine(locations, by: 0)
+            .groupTuple()
+            .multiMap{it ->
+                meta: it[1]
+                assemblies: it[2]
+                schema: it[3].unique()
+                organism: it[0]
+            }
+            .set { allele_call_ch }
+
     ALLELE_CALL (
-        SKESA.out.org_assembly |
-            groupTuple() |
-            join(PREP_EXTERNAL_SCHEMA.out.schema)
+        allele_call_ch
     )
 
     //
