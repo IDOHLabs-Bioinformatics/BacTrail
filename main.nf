@@ -18,6 +18,7 @@ nextflow.enable.dsl = 2
 */
 
 include { BACTRAIL_ADD                    } from './workflows/bactrail_add'
+include { BACTRAIL_ANALYZE                } from './workflows/bactrail_analyze'
 include { PIPELINE_INITIALISATION_ADD     } from './subworkflows/local/utils_nfcore_bactrail_pipeline'
 include { PIPELINE_INITIALISATION_ANALYZE } from './subworkflows/local/utils_nfcore_bactrail_pipeline'
 include { PIPELINE_COMPLETION_ADD         } from './subworkflows/local/utils_nfcore_bactrail_pipeline'
@@ -72,9 +73,19 @@ workflow NFCORE_BACTRAIL_ADD {
 //
 workflow NFCORE_BACTRAIL_ANALYZE {
 
+    take:
+    organism // channel: organism read in from --organism
+    db_name  // channel: database name read in from --db_name
+
     main:
 
-    println("analyze")
+    //
+    // WORKFLOW: Run pipeline
+    //
+    BACTRAIL_ANALYZE(
+        organism,
+        db_name
+    )
 
 }
 /*
@@ -137,6 +148,8 @@ workflow {
         // WORKFLOW: Run main workflow
         //
         NFCORE_BACTRAIL_ANALYZE (
+            params.organism,
+            params.db_name
         )
 
         //
