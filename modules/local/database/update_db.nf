@@ -4,7 +4,8 @@ process UPDATE_DB {
 
     input:
     tuple val(meta), path(reads), path(assembly), path(gff), path(aligned), path(vcf)
-    val(db_name)
+    val db_name
+    path ref
 
     output:
     path("version.yml"), emit: version
@@ -21,7 +22,8 @@ process UPDATE_DB {
         -a ${assembly} \\
         -g ${gff} \\
         -f ${aligned} \\
-        -v ${vcf}
+        -v ${vcf} \\
+        -r ${ref}
 
     cat << END_VERSIONS > version.yml
     "${task.process}":

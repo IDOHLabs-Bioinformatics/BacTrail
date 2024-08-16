@@ -115,7 +115,8 @@ workflow BACTRAIL_ADD {
 
     UPDATE_DB (
         updating_ch,
-        params.db_name
+        params.db_name,
+        ch_reference.first()
     )
 
     //
