@@ -1,4 +1,3 @@
-import sys
 import argparse
 import sqlite3
 from contextlib import closing
@@ -31,10 +30,14 @@ if __name__ == '__main__':
         # pull data
         data = cursor.execute("SELECT id, assembly, gff, aligned, vcf FROM intermediate WHERE organism = ?",
                               [organism]).fetchall()
+
+        # if the organism is not present, raise an error
+        if len(data) == 0:
+            message = "Organism '{}' is not present in {}".format(organism, database)
+            raise ValueError(message)
+
         for row in data:
             build_file(row[0], row[1], 'fasta')
             build_file(row[0], row[2], 'gff')
             build_file(row[0], row[3], 'aln')
             build_file(row[0], row[4], 'vcf')
-
-    print(row[0])
