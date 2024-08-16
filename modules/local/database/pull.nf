@@ -8,6 +8,7 @@ process PULL {
 
     output:
     path('*.fasta'),     emit: fasta
+    path("*.fna"),       emit: reference
     path('*.gff'),       emit: gff
     path('*.aln'),       emit: aln
     path('*.vcf'),       emit: vcf

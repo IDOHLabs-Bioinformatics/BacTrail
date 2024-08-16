@@ -31,6 +31,9 @@ if __name__ == '__main__':
         data = cursor.execute("SELECT id, assembly, gff, aligned, vcf FROM intermediate WHERE organism = ?",
                               [organism]).fetchall()
 
+        # pull reference genome
+        reference = cursor.execute("SELECT sequence FROM reference_genomes WHERE organism = ?", [organism]).fetchall()
+
         # if the organism is not present, raise an error
         if len(data) == 0:
             message = "Organism '{}' is not present in {}".format(organism, database)
@@ -41,3 +44,5 @@ if __name__ == '__main__':
             build_file(row[0], row[2], 'gff')
             build_file(row[0], row[3], 'aln')
             build_file(row[0], row[4], 'vcf')
+
+        build_file('reference', reference[0][0], 'fna')
