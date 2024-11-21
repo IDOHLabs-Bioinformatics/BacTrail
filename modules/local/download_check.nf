@@ -15,9 +15,14 @@ process DOWNLOAD_CHECK {
 
     script:
     """
-    need=\$(python ${projectDir}/bin/download_check.py -t ${organism} -s ${schemas} 2> err.tmp)
-    avail=\$(cat err.tmp)
-    rm err.tmp
+    if [ -d "${schemas}" ]; then
+      need=\$(python ${projectDir}/bin/download_check.py -t ${organism} -s ${schemas} 2> err.tmp)
+      avail=\$(cat err.tmp)
+      rm err.tmp
+    else
+      >&2 echo ${schemas} does not exist
+      exit 64
+    fi
     """
 
     stub:
