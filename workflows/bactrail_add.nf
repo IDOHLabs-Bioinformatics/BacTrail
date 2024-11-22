@@ -40,8 +40,9 @@ workflow BACTRAIL_ADD {
     //
     // MODULE: Download check
     //
+    organisms = ch_samplesheet.map { it[0].org }.unique()
     DOWNLOAD_CHECK (
-        ch_samplesheet.map { it[0].org }.unique(),
+        organisms,
         params.schema_dir
     )
 
@@ -49,7 +50,7 @@ workflow BACTRAIL_ADD {
     // MODULE: Download schema from Chewie-NS
     //
     SCHEMA_DOWNLOAD (
-        DOWNLOAD_CHECK.out.needed.filter{ it[1] != ''}
+        DOWNLOAD_CHECK.out.needed.filter{ it[1] != '' }
     )
 
     //

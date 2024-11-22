@@ -8,7 +8,7 @@ process SCHEMA_DOWNLOAD {
         'biocontainers/chewBBACA:3.3.5--pyhdfd78af_0' }"
 
     input:
-    val(organism)
+    tuple val(meta), val(organism)
 
     output:
     tuple val("${organism}"), path("${organism}/*"), emit: schema, optional: true
