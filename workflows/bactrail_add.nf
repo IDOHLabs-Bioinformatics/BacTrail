@@ -14,7 +14,7 @@ include { DOWNLOAD_CHECK         } from '../modules/local/download_check.nf'
 include { SCHEMA_DOWNLOAD        } from '../modules/local/chewBBACA/SchemaDownload.nf'
 include { SNIPPY                 } from '../modules/local/snippy/snippy.nf'
 include { PREP_EXTERNAL_SCHEMA   } from '../modules/local/chewBBACA/PrepExternalSchema.nf'
-include { SKESA                  } from '../modules/local/skesa/skesa.nf'
+include { SPADES                 } from '../modules/local/spades/spades.nf'
 include { ALLELE_CALL            } from '../modules/local/chewBBACA/AlleleCall.nf'
 include { ALLELE_CALL_EVALUATOR  } from '../modules/local/chewBBACA/AlleleCallEvaluator.nf'
 include { PROKKA                 } from '../modules/local/prokka/prokka.nf'
@@ -61,9 +61,9 @@ workflow BACTRAIL_ADD {
     )
 
     //
-    // MODULE: SKESA
+    // MODULE: Spades
     //
-    SKESA (
+    SPADES (
         ch_samplesheet
     )
 
@@ -71,7 +71,7 @@ workflow BACTRAIL_ADD {
     // MODULE: Allele Call
     //
     locations = DOWNLOAD_CHECK.out.available.concat(PREP_EXTERNAL_SCHEMA.out.schema)
-    SKESA.out.org_assembly
+    SPADES.out.org_assembly
             .combine(locations, by: 0)
             .groupTuple()
             .multiMap{it ->
@@ -97,7 +97,7 @@ workflow BACTRAIL_ADD {
     // MODULE: Prokka
     //
     PROKKA (
-        SKESA.out.assembly
+        SPADES.out.assembly
     )
 
     //
@@ -109,7 +109,7 @@ workflow BACTRAIL_ADD {
     )
 
     updating_ch = ch_samplesheet
-                    .join(SKESA.out.assembly)
+                    .join(SPADES.out.assembly)
                     .join(PROKKA.out.gff)
                     .join(SNIPPY.out.aligned)
                     .join(SNIPPY.out.vcf)
