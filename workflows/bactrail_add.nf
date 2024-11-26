@@ -10,13 +10,11 @@ include { paramsSummaryMap       } from 'plugin/nf-validation'
 include { paramsSummaryMultiqc   } from '../subworkflows/nf-core/utils_nfcore_pipeline'
 include { softwareVersionsToYAML } from '../subworkflows/nf-core/utils_nfcore_pipeline'
 include { methodsDescriptionText } from '../subworkflows/local/utils_nfcore_bactrail_pipeline'
-include { DOWNLOAD_CHECK         } from '../modules/local/download_check.nf'
-include { SCHEMA_DOWNLOAD        } from '../modules/local/chewBBACA/SchemaDownload.nf'
+include { DATABASE_VERIFY        } from '../modules/local/database_verify.nf'
+include { POPPUNK_ASSIGN         } from '../modules/local/poppunk/poppunk_assign.nf'
 include { SNIPPY                 } from '../modules/local/snippy/snippy.nf'
-include { PREP_EXTERNAL_SCHEMA   } from '../modules/local/chewBBACA/PrepExternalSchema.nf'
 include { SPADES                 } from '../modules/local/spades/spades.nf'
-include { ALLELE_CALL            } from '../modules/local/chewBBACA/AlleleCall.nf'
-include { ALLELE_CALL_EVALUATOR  } from '../modules/local/chewBBACA/AlleleCallEvaluator.nf'
+include { POPPUNK_QUERY          } from '../modules/local/poppunk_query.nf'
 include { PROKKA                 } from '../modules/local/prokka/prokka.nf'
 include { UPDATE_DB              } from '../modules/local/database/update_db.nf'
 
@@ -41,23 +39,9 @@ workflow BACTRAIL_ADD {
     // MODULE: Download check
     //
     organisms = ch_samplesheet.map { it[0].org }.unique()
-    DOWNLOAD_CHECK (
-        organisms,
-        params.schema_dir
-    )
-
-    //
-    // MODULE: Download schema from Chewie-NS
-    //
-    SCHEMA_DOWNLOAD (
-        DOWNLOAD_CHECK.out.needed.filter{ it[1] != '' }
-    )
-
-    //
-    // MODULE: PrepExternalSchema
-    //
-    PREP_EXTERNAL_SCHEMA (
-        SCHEMA_DOWNLOAD.out.schema
+    DATABASE_VERIFY(
+        params.schema_dir,
+        organisms
     )
 
     //
@@ -68,29 +52,23 @@ workflow BACTRAIL_ADD {
     )
 
     //
-    // MODULE: Allele Call
+    // MODULE: Make popPUNK query file
     //
-    locations = DOWNLOAD_CHECK.out.available.concat(PREP_EXTERNAL_SCHEMA.out.schema)
-    SPADES.out.org_assembly
-            .combine(locations, by: 0)
-            .groupTuple()
-            .multiMap{it ->
-                meta: it[1]
-                assemblies: it[2]
-                schema: it[3].unique()
-                organism: it[0]
-            }
-            .set { allele_call_ch }
-
-    ALLELE_CALL (
-        allele_call_ch
+    grouped_assemblies = SPADES.out.org_assembly.groupTuple()
+    POPPUNK_QUERY (
+        grouped_assemblies
     )
 
     //
-    // MODULE: Allele Call Evaluator
+    // MODULE: popPUNK cluster assignment
     //
-    ALLELE_CALL_EVALUATOR (
-        ALLELE_CALL.out.dir
+    launch_poppunk = DATABASE_VERIFY.out.organism_schema
+        .join(POPPUNK_QUERY.out.query)
+        .join(grouped_assemblies)
+    POPPUNK_ASSIGN (
+        launch_poppunk,
+
+        params.schema_dir
     )
 
     //

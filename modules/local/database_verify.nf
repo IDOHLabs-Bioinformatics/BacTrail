@@ -1,0 +1,34 @@
+process DATABASE_VERIFY {
+    label 'process_low'
+    tag "${organism}"
+
+    input:
+    path(schema_dir)
+    val(organism)
+
+    output:
+    tuple val(organism), env(schema_path), emit: organism_schema
+    path("version.yml"),                   emit: version
+
+    script:
+    """
+    schema_path=\$(python ${projectDir}/bin/database_verify.py \\
+        -s ${schema_dir} \\
+        -o ${organism})
+    ln -s ${schema_dir}/\$schema_path \$schema_path
+    cat << END_VERSIONS > version.yml
+    "${task.process}":
+        python: \$(python --version | cut -d ' ' -f 2)
+    END_VERSIONS
+    """
+
+    stub:
+    """
+    schema_path=\$(echo stub)
+
+    cat << END_VERSIONS > version.yml
+    "${task.process}":
+        python: \$(python --version | cut -d ' ' -f 2)
+    END_VERSIONS
+    """
+}
