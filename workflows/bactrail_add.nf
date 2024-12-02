@@ -67,7 +67,6 @@ workflow BACTRAIL_ADD {
         .join(grouped_assemblies)
     POPPUNK_ASSIGN (
         launch_poppunk,
-
         params.schema_dir
     )
 
@@ -94,6 +93,7 @@ workflow BACTRAIL_ADD {
 
     UPDATE_DB (
         updating_ch,
+        POPPUNK_ASSIGN.out.clusters.first(),
         params.db_name,
         ch_reference.first()
     )

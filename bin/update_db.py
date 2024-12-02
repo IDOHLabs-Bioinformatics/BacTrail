@@ -4,6 +4,16 @@ import sqlite3
 from contextlib import closing
 
 
+def find_cluster_id(samp_id, cluster_file):
+    with open(cluster_file, 'r') as infile:
+        for line in infile.readlines():
+            info = line.strip().split(',')
+            if info[0] == samp_id:
+                return info[1]
+
+    raise ValueError("No matching sample ID in popPUNK cluster file.")
+
+
 def reference_insert(c, organism, ref):
     references = c.execute("SELECT organism FROM reference_genomes").fetchall()
     if (organism,) in references:
@@ -39,6 +49,7 @@ def parse():
     parser.add_argument('-f', '--fasta', required=True)
     parser.add_argument('-v', '--vcf', required=True)
     parser.add_argument('-r', '--reference', required=True)
+    parser.add_argument('-c', '--clusters', required=True)
     arguments = parser.parse_args()
 
     return arguments
@@ -56,7 +67,7 @@ if __name__ == '__main__':
         # make the intermediate table if not already there
         if not check_table(cursor, 'intermediate'):
             cursor.execute(
-                "CREATE TABLE intermediate (ID TEXT PRIMARY KEY, organism TEXT, assembly TEXT, gff TEXT, aligned TEXT, vcf TEXT)")
+                "CREATE TABLE intermediate (ID TEXT PRIMARY KEY, organism TEXT, assembly TEXT, gff TEXT, aligned TEXT, vcf TEXT, cluster TEXT)")
 
         # make the reference genome table if not already there
         if not check_table(cursor, 'reference_genomes'):
@@ -64,9 +75,10 @@ if __name__ == '__main__':
                 "CREATE TABLE reference_genomes (organism TEXT PRIMARY KEY, sequence TEXT)")
 
         # insert data
-        cursor.execute("INSERT INTO intermediate VALUES (?, ?, ?, ?, ?, ?)",
+        cluster = find_cluster_id(args.id, args.clusters)
+        cursor.execute("INSERT INTO intermediate VALUES (?, ?, ?, ?, ?, ?, ?)",
                        (args.id, args.organism, contents(args.assembly),
-                        contents(args.gff), contents(args.fasta), contents(args.vcf)))
+                        contents(args.gff), contents(args.fasta), contents(args.vcf), cluster))
 
         # insert reference genome if not present
         reference_insert(cursor, args.organism, contents(args.reference))

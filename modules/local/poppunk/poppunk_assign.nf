@@ -12,8 +12,8 @@ process POPPUNK_ASSIGN {
     val(schema_base)
 
     output:
-    path("poppunk_clusters/poppunk_clusters_clusters.csv"), emit: clusters
-    path("version.yml"),                                    emit: version
+    tuple val(meta), path("poppunk_clusters/poppunk_clusters_clusters.csv"), emit: clusters
+    path("version.yml"),                                                     emit: version
 
     when:
     task.ext.when == null || task.ext.when
