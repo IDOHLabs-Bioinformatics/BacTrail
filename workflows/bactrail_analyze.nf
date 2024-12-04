@@ -10,6 +10,7 @@ include { SNIPPY_CLEAN          } from '../modules/local/snippy/snippy_clean'
 include { SNP_SITES             } from '../modules/local/snippy/snp_sites.nf'
 include { SNP_DISTS             } from '../modules/local/snp_dists/snp_dists.nf'
 include { PANAROO               } from '../modules/local/panaroo/panaroo.nf'
+include { IQTREE                } from '../modules/local/iqtree/iqtree.nf'
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -51,5 +52,9 @@ workflow BACTRAIL_ANALYZE {
 
     PANAROO (
         PULL.out.gff.collect()
+    )
+
+    IQTREE (
+        PANAROO.out.core
     )
 }
