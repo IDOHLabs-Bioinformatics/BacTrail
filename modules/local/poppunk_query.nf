@@ -3,7 +3,7 @@ process POPPUNK_QUERY {
     tag "${organism}"
 
     input:
-    tuple val(organism), val(metas), path(assemblies)
+    tuple val(organism), path(assemblies)
 
     output:
     tuple val(organism), path("popPUNK_query.txt"), emit: query

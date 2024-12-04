@@ -29,11 +29,18 @@
             },
             "organism": {
                 "type": "string",
-                "meta": ["org"],
+                "meta": ["organism"],
                 "pattern": "^\\S+$",
                 "errorMessage": "The unabbreviated organism name must be provided with '_' replacing any spaces."
+            },
+            "reference": {
+                "type": "string",
+                "format": "file-path",
+                "exists": true,
+                "pattern": "^\\S+.fasta$",
+                "errorMessage": "The reference genome should the absolute path the the fasta file."
             }
         },
-        "required": ["sample", "fastq_1", "organism"]
+        "required": ["sample", "fastq_1", "organism", "reference"]
     }
 }

@@ -36,7 +36,6 @@ workflow PIPELINE_INITIALISATION_ADD {
     nextflow_cli_args //   array: List of positional nextflow CLI args
     outdir            //  string: The output directory where the results will be saved
     input             //  string: Path to input samplesheet
-    reference         //  string: Path to the reference genome
 
     main:
 
@@ -84,11 +83,11 @@ workflow PIPELINE_INITIALISATION_ADD {
     Channel
         .fromSamplesheet("input")
         .map {
-            meta, fastq_1, fastq_2 ->
+            meta, fastq_1, fastq_2, reference ->
                 if (!fastq_2) {
-                    return [ meta.id, meta + [ single_end:true ], [ fastq_1 ] ]
+                    return [ meta.id, meta + [ single_end:true ], [ fastq_1 ], reference ]
                 } else {
-                    return [ meta.id, meta + [ single_end:false ], [ fastq_1, fastq_2 ] ]
+                    return [ meta.id, meta + [ single_end:false ], [ fastq_1, fastq_2 ], reference ]
                 }
         }
         .groupTuple()
@@ -96,19 +95,17 @@ workflow PIPELINE_INITIALISATION_ADD {
             validateInputSamplesheet(it)
         }
         .map {
-            meta, fastqs ->
-                return [ meta, fastqs.flatten() ]
+            meta, fastqs, reference ->
+                return [ meta, fastqs.flatten(), reference ]
         }
         .set { ch_samplesheet }
 
     //
     // Create channel from reference
     //
-    Channel.fromPath(reference, checkIfExists: true).set{ ch_reference }
 
     emit:
     samplesheet = ch_samplesheet
-    reference   = ch_reference
     versions    = ch_versions
 }
 
@@ -264,7 +261,7 @@ def validateInputParameters() {
 // Validate channels from input samplesheet
 //
 def validateInputSamplesheet(input) {
-    def (metas, fastqs) = input[1..2]
+    def (metas, fastqs, reference) = input[1..3]
 
     // Check that multiple runs of the same sample are of the same datatype i.e. single-end / paired-end
     def endedness_ok = metas.collect{ it.single_end }.unique().size == 1
@@ -272,7 +269,7 @@ def validateInputSamplesheet(input) {
         error("Please check input samplesheet -> Multiple runs of a sample must be of the same datatype i.e. single-end or paired-end: ${metas[0].id}")
     }
 
-    return [ metas[0], fastqs ]
+    return [ metas[0], fastqs, reference ]
 }
 //
 // Get attribute from genome config file e.g. fasta

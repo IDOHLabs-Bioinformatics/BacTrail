@@ -11,7 +11,7 @@ process PROKKA {
     tuple val(meta), path(assembly)
 
     output:
-    tuple val(meta), path("*.gff"), emit: gff
+    tuple val(meta.organism), val(meta), path("*.gff"), emit: gff
     tuple val(meta), path("*.err"), emit: err
     tuple val(meta), path("*.faa"), emit: faa
     tuple val(meta), path("*.fna"), emit: fna

@@ -3,10 +3,8 @@ process UPDATE_DB {
     label "process_single"
 
     input:
-    tuple val(meta), path(reads), path(assembly), path(gff), path(aligned), path(vcf)
-    tuple val(cluster_meta), path(clusters)
+    tuple val(organism), path(assembly), val(meta), path(gff), path(aligned), path(ref), path(vcf), path(clusters)
     val db_name
-    path ref
 
     output:
     path("version.yml"), emit: version
@@ -19,7 +17,7 @@ process UPDATE_DB {
     python ${projectDir}/bin/update_db.py \\
         -d ${db_name} \\
         -i ${meta.id} \\
-        -o ${meta.org} \\
+        -o ${organism} \\
         -a ${assembly} \\
         -g ${gff} \\
         -f ${aligned} \\
@@ -32,6 +30,7 @@ process UPDATE_DB {
         sqlite3: \$(echo 'import sqlite3;print(sqlite3.version);' | python)
     END_VERSIONS
     """
+
     stub:
     """
     cat << END_VERSIONS > version.yml

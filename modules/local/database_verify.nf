@@ -14,7 +14,8 @@ process DATABASE_VERIFY {
     """
     schema_path=\$(python ${projectDir}/bin/database_verify.py \\
         -s ${schema_dir} \\
-        -o ${organism})
+        -o ${organism} \\
+        )
     ln -s ${schema_dir}/\$schema_path \$schema_path
     cat << END_VERSIONS > version.yml
     "${task.process}":

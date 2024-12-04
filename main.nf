@@ -51,7 +51,6 @@ workflow NFCORE_BACTRAIL_ADD {
 
     take:
     samplesheet // channel: samplesheet read in from --input
-    reference   // channel: reference genome read in from --reference
 
     main:
 
@@ -59,8 +58,7 @@ workflow NFCORE_BACTRAIL_ADD {
     // WORKFLOW: Run pipeline
     //
     BACTRAIL_ADD (
-        samplesheet,
-        reference
+        samplesheet
     )
 
     emit:
@@ -109,16 +107,14 @@ workflow {
             params.monochrome_logs,
             args,
             params.outdir,
-            params.input,
-            params.reference
+            params.input
         )
 
         //
         // WORKFLOW: Run main workflow
         //
         NFCORE_BACTRAIL_ADD (
-            PIPELINE_INITIALISATION_ADD.out.samplesheet,
-            PIPELINE_INITIALISATION_ADD.out.reference
+            PIPELINE_INITIALISATION_ADD.out.samplesheet
         )
 
         //

@@ -8,12 +8,12 @@ process POPPUNK_ASSIGN {
         'biocontainers/poppunk:2.7.2--py312hda6a541_0' }"
 
     input:
-    tuple val(organism), val(db), path(query), val(meta), path(assembly)
+    tuple val(organism), val(db), path(query), path(assembly)
     val(schema_base)
 
     output:
-    tuple val(meta), path("poppunk_clusters/poppunk_clusters_clusters.csv"), emit: clusters
-    path("version.yml"),                                                     emit: version
+    tuple val(organism), path("poppunk_clusters/poppunk_clusters_clusters.csv"), emit: clusters
+    path("version.yml"),                                                         emit: version
 
     when:
     task.ext.when == null || task.ext.when
@@ -43,7 +43,12 @@ process POPPUNK_ASSIGN {
 
     stub:
     """
+    touch poppunk_clusters/poppunk_clusters_clusters.csv
 
+    cat << END_VERSIONS > version.yml
+    "${task.process}":
+        poppunk: \$(poppunk --version | cut -f 2 -d ' ')
+    END_VERSIONS
     """
 
 }

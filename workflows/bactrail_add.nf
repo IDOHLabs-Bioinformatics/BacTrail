@@ -4,12 +4,12 @@
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
 
-include { FASTQC                 } from '../modules/nf-core/fastqc/main'
 include { MULTIQC                } from '../modules/nf-core/multiqc/main'
 include { paramsSummaryMap       } from 'plugin/nf-validation'
 include { paramsSummaryMultiqc   } from '../subworkflows/nf-core/utils_nfcore_pipeline'
 include { softwareVersionsToYAML } from '../subworkflows/nf-core/utils_nfcore_pipeline'
 include { methodsDescriptionText } from '../subworkflows/local/utils_nfcore_bactrail_pipeline'
+include { GRAB_ORGANISM          } from '../modules/local/grab_organism.nf'
 include { DATABASE_VERIFY        } from '../modules/local/database_verify.nf'
 include { POPPUNK_ASSIGN         } from '../modules/local/poppunk/poppunk_assign.nf'
 include { SNIPPY                 } from '../modules/local/snippy/snippy.nf'
@@ -28,7 +28,6 @@ workflow BACTRAIL_ADD {
 
     take:
     ch_samplesheet // channel: samplesheet read in from --input
-    ch_reference
 
     main:
 
@@ -36,9 +35,19 @@ workflow BACTRAIL_ADD {
     ch_multiqc_files = Channel.empty()
 
     //
-    // MODULE: Download check
+    // MODULE: Grab organisms to make unique
     //
-    organisms = ch_samplesheet.map { it[0].org }.unique()
+    GRAB_ORGANISM (
+        ch_samplesheet
+    )
+
+    GRAB_ORGANISM.out.organism
+        .unique()
+        .set{ organisms }
+
+    //
+    // MODULE: Database verify
+    //
     DATABASE_VERIFY(
         params.schema_dir,
         organisms
@@ -49,6 +58,7 @@ workflow BACTRAIL_ADD {
     //
     SPADES (
         ch_samplesheet
+            .map{ meta, reads, reference -> tuple(meta, reads) }
     )
 
     //
@@ -80,22 +90,22 @@ workflow BACTRAIL_ADD {
     //
     // MODULE: Snippy
     //
+
     SNIPPY (
-        ch_samplesheet,
-        ch_reference.first()
+        //ch_samplesheet.map{ meta, fastqs, reference, organism -> tuple(meta, fastqs, reference) }
+        ch_samplesheet
     )
 
-    updating_ch = ch_samplesheet
-                    .join(SPADES.out.assembly)
+    updating_ch = SPADES.out.org_assembly
                     .join(PROKKA.out.gff)
                     .join(SNIPPY.out.aligned)
                     .join(SNIPPY.out.vcf)
 
+    updating_ch = updating_ch.combine(POPPUNK_ASSIGN.out.clusters, by:0)
+
     UPDATE_DB (
         updating_ch,
-        POPPUNK_ASSIGN.out.clusters.first(),
-        params.db_name,
-        ch_reference.first()
+        params.db_name
     )
 
     //
