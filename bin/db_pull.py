@@ -42,7 +42,7 @@ if __name__ == '__main__':
         for row in data:
             build_file(row[0], row[1], 'fasta')
             build_file(row[0], row[2], 'gff')
-            build_file(row[0], row[3], 'aln')
+            build_file(row[0], row[3], 'aligned.fa')
             build_file(row[0], row[4], 'vcf')
 
         build_file('reference', reference[0][0], 'fna')

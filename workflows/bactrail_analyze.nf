@@ -5,6 +5,7 @@
 */
 
 include { PULL                 } from '../modules/local/database/pull'
+include {SNIPPY_CORE           } from '../modules/local/snippy/snippy_core'
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -23,5 +24,12 @@ workflow BACTRAIL_ANALYZE {
     PULL (
         organism,
         db_name
+    )
+
+    SNIPPY_CORE (
+        PULL.out.fasta,
+        PULL.out.aln,
+        PULL.out.vcf,
+        PULL.out.reference
     )
 }

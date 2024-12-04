@@ -10,7 +10,7 @@ process PULL {
     path('*.fasta'),     emit: fasta
     path("*.fna"),       emit: reference
     path('*.gff'),       emit: gff
-    path('*.aln'),       emit: aln
+    path('*.aligned.fa'),       emit: aln
     path('*.vcf'),       emit: vcf
     path("version.yml"), emit: version
 

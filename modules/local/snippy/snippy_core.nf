@@ -8,18 +8,20 @@ process SNIPPY_CORE {
         'biocontainers/snippy:4.6.0--hdfd78af_1' }"
 
     input:
-    path(samples)
+    path(fasta)
+    path(align)
+    path(vcf)
     path(ref)
 
     output:
-    path("*.aln"),           emit: "core_aln"
-    path("*.full.aln"),      emit: "wg_align"
-    path("*.ref.fa"),        emit: "ref"
-    path("*.tab"),           emit: "core_snps"
-    path("*.txt"),           emit: "stats"
-    path("*.vcf"),           emit: "vcf"
-    path("*.self_mask.bed"), emit: "bed", optional: true
-    path("version.yml"),     emit: "version"
+    path("*.aln"),           emit: core_aln
+    path("*.full.aln"),      emit: wg_align
+    path("*.ref.fa"),        emit: ref
+    path("*.tab"),           emit: core_snps
+    path("*.txt"),           emit: stats
+    path("*.vcf"),           emit: vcf
+    path("*.self_mask.bed"), emit: bed, optional: true
+    path("version.yml"),     emit: version
 
     when:
     task.ext.when == null || task.ext.when
@@ -27,7 +29,16 @@ process SNIPPY_CORE {
     script:
     def args = task.ext.args ?: ''
     """
-    snippy_core \\
+    directories=''
+    for file in *.fasta; do
+      handle=\$(echo \$file | awk -F '.fasta' '{print\$1}')
+      mkdir \$handle
+      mv \$file \$handle
+      mv \$handle.aligned.fa \$handle
+      mv \$handle.vcf \$handle
+    done
+
+    snippy-core \\
         --ref ${ref} \\
         \$(ls -d */)
 
