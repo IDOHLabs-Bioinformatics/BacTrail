@@ -6,6 +6,7 @@
 
 include { PULL                 } from '../modules/local/database/pull'
 include {SNIPPY_CORE           } from '../modules/local/snippy/snippy_core'
+include {SNIPPY_CLEAN          } from '../modules/local/snippy/snippy_clean'
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -31,5 +32,9 @@ workflow BACTRAIL_ANALYZE {
         PULL.out.aln,
         PULL.out.vcf,
         PULL.out.reference
+    )
+
+    SNIPPY_CLEAN (
+        SNIPPY_CORE.out.wg_align
     )
 }
