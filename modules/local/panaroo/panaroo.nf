@@ -11,7 +11,7 @@ process PANAROO {
     path(gffs)
 
     output:
-    path("*_core_genome"), emit: core
+    path("core_genome/core_gene_alignment.aln"), emit: core
     path("version.yml"),   emit: version
 
     when:
@@ -20,12 +20,11 @@ process PANAROO {
     script:
     def args = task.ext.args ?: ''
     """
-    today=\$(date +%F)
-
     panaroo \\
         -i *.gff \\
-        -o \$today_core_genome \\
+        -o core_genome \\
         --clean-mode strict \\
+        -a core \\
         $args
 
     cat << END_VERSIONS > version.yml
