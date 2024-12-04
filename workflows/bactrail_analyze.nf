@@ -7,6 +7,7 @@
 include { PULL                 } from '../modules/local/database/pull'
 include {SNIPPY_CORE           } from '../modules/local/snippy/snippy_core'
 include {SNIPPY_CLEAN          } from '../modules/local/snippy/snippy_clean'
+include {SNP_SITES             } from '../modules/local/snippy/snp_sites.nf'
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -36,5 +37,9 @@ workflow BACTRAIL_ANALYZE {
 
     SNIPPY_CLEAN (
         SNIPPY_CORE.out.wg_align
+    )
+
+    SNP_SITES (
+        SNIPPY_CLEAN.out.cleaned
     )
 }
