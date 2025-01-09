@@ -27,12 +27,14 @@ process POPPUNK_ASSIGN {
       poppunk_assign \\
           --db ${schema_base}${db} \\
           --query ${query} \\
-          --output poppunk_clusters
+          --output poppunk_clusters \\
+          ${args}
     else
       poppunk_assign \\
           --db ${schema_base}/${db} \\
           --query ${query} \\
-          --output poppunk_clusters
+          --output poppunk_clusters \\
+          ${args}
     fi
 
     cat << END_VERSIONS > version.yml
