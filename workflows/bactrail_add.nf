@@ -96,12 +96,11 @@ workflow BACTRAIL_ADD {
         ch_samplesheet
     )
 
-    updating_ch = SPADES.out.org_assembly
+    updating_ch = SPADES.out.id_assembly
                     .join(PROKKA.out.gff)
-                    .join(SNIPPY.out.aligned)
-                    .join(SNIPPY.out.vcf)
-
-    updating_ch = updating_ch.combine(POPPUNK_ASSIGN.out.clusters, by:0)
+                    .join(SNIPPY.out.results)
+                    .map{ it -> [it[1], it[0], it[2], it[3], it[4]] }
+                    .combine(POPPUNK_ASSIGN.out.clusters, by:0)
 
     UPDATE_DB (
         updating_ch,
