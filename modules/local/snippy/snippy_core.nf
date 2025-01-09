@@ -40,6 +40,7 @@ process SNIPPY_CORE {
 
     snippy-core \\
         --ref ${ref} \\
+        ${args} \\
         \$(ls -d */)
 
 

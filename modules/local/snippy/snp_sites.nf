@@ -19,8 +19,12 @@ process SNP_SITES {
     task.ext.when == null || task.ext.when
 
     script:
+    def args = task.ext.args ?: ''
     """
-    snp-sites -c ${alignment} > clean.core.aln
+    snp-sites \\
+        -c ${alignment} \\
+         ${args} \\
+         > clean.core.aln
 
     cat << END_VERSION > version.yml
     "${task.process}":

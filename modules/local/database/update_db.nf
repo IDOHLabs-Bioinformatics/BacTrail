@@ -1,9 +1,10 @@
 process UPDATE_DB {
-    tag "${meta.id}"
+    tag "${id}"
     label "process_single"
+    maxForks 1
 
     input:
-    tuple val(organism), path(assembly), val(meta), path(gff), path(aligned), path(ref), path(vcf), path(clusters)
+    tuple val(organism), val(id), path(assembly), path(gff), path(snippy), path(clusters)
     val db_name
 
     output:
@@ -16,13 +17,13 @@ process UPDATE_DB {
     """
     python ${projectDir}/bin/update_db.py \\
         -d ${db_name} \\
-        -i ${meta.id} \\
+        -i ${id} \\
         -o ${organism} \\
         -a ${assembly} \\
         -g ${gff} \\
-        -f ${aligned} \\
-        -v ${vcf} \\
-        -r ${ref} \\
+        -f ${snippy}/snps.aligned.fa \\
+        -v ${snippy}/snps.vcf \\
+        -r ${snippy}/reference/ref.fa \\
         -c ${clusters}
 
     cat << END_VERSIONS > version.yml

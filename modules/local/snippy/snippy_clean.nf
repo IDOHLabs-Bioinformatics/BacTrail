@@ -20,7 +20,10 @@ process SNIPPY_CLEAN {
     script:
     def args = task.ext.args ?: ''
     """
-    snippy-clean_full_aln core.full.aln > clean.full.aln
+    snippy-clean_full_aln \\
+        ${args} \\
+        core.full.aln \\
+        > clean.full.aln
 
     cat << END_VERSION > version.yml
     "${task.process}":
