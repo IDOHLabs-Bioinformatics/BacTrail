@@ -25,6 +25,7 @@ process PANAROO {
         -o core_genome \\
         --clean-mode strict \\
         -a core \\
+        -t ${task.cpus} \\
         $args
 
     cat << END_VERSIONS > version.yml
