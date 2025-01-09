@@ -11,21 +11,7 @@ process SNIPPY {
     tuple val(meta), path(reads), path(ref)
 
     output:
-    tuple val(meta.organism), path("snps.aligned.fa"), path(ref),        emit: aligned
-    tuple val(meta), path("snps.bam"),                                   emit: bam
-    tuple val(meta), path("snps.bed"),                                   emit: bed
-    tuple val(meta), path("snps.consensus.fa"),                          emit: consensus
-    tuple val(meta), path("snps.consensus.subs.fa"),                     emit: consensus_subs
-    tuple val(meta), path("snps.csv"),                                   emit: csv
-    tuple val(meta), path("snps.gff"),                                   emit: gff
-    tuple val(meta), path("snps.filt.vcf"),                              emit: filt_vcf
-    tuple val(meta), path("snps.html"),                                  emit: html
-    tuple val(meta), path("snps.log"),                                   emit: log
-    tuple val(meta), path("snps.raw.vcf"),                               emit: raw_vcf
-    tuple val(meta), path("snps.subs.vcf"),                              emit: subs_vcf
-    tuple val(meta), path("snps.tab"),                                   emit: tab
-    tuple val(meta), path("snps.txt"),                                   emit: txt
-    tuple val(meta.organism), path("snps.vcf"),                          emit: vcf
+    tuple val(meta.id), path("${meta.id}_snippy"),                                 emit: results
     path("version.yml"),                                                 emit: version
 
     when:
@@ -43,7 +29,7 @@ process SNIPPY {
     --R2 ${reads[1]} \\
     ${args}
 
-    mv ${prefix}_snippy/* .
+
     cat << END_VERSIONS > version.yml
     "${task.process}":
         snippy: \$(snippy -v | sed -e "s/snippy //g")

@@ -11,9 +11,10 @@ process SPADES {
     tuple val(meta), path(reads)
 
     output:
-    tuple val(meta), path("assembly/*_assembly.fasta"),                     emit: assembly
-    tuple val(meta.organism), path("assembly/*_assembly.fasta"),  emit: org_assembly
-    path("version.yml"),                                                    emit: version
+    tuple val(meta.id), val(meta.organism), path("assembly/*_assembly.fasta"),  emit: id_assembly
+    tuple val(meta.organism), path("assembly/*_assembly.fasta"),       emit: org_assembly
+    tuple val(meta), path("assembly/*_assembly.fasta"),                emit: assembly
+    path("version.yml"),                                               emit: version
 
     when:
     task.ext.when == null || task.ext.when
