@@ -4,10 +4,11 @@
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
 
-include { PULL                 } from '../modules/local/database/pull'
+include { PULL                  } from '../modules/local/database/pull'
 include { SNIPPY_CORE           } from '../modules/local/snippy/snippy_core'
 include { SNIPPY_CLEAN          } from '../modules/local/snippy/snippy_clean'
 include { SNP_SITES             } from '../modules/local/snippy/snp_sites.nf'
+include { GUBBINS               } from '../modules/local/gubbins/gubbins.nf'
 include { SNP_DISTS             } from '../modules/local/snp_dists/snp_dists.nf'
 include { PANAROO               } from '../modules/local/panaroo/panaroo.nf'
 include { IQTREE                } from '../modules/local/iqtree/iqtree.nf'
@@ -42,13 +43,29 @@ workflow BACTRAIL_ANALYZE {
         SNIPPY_CORE.out.wg_align
     )
 
-    SNP_SITES (
-        SNIPPY_CLEAN.out.cleaned
-    )
+    if (params.remove_recombinants) {
+        GUBBINS (
+            SNIPPY_CLEAN.out.cleaned
+        )
 
-    SNP_DISTS (
-        SNP_SITES.out.snp_selected
-    )
+        SNP_SITES (
+            GUBBINS.out.gubbins_filtered
+        )
+
+        SNP_DISTS (
+            SNP_SITES.out.snp_selected
+        )
+    }
+
+    else {
+        SNP_SITES (
+            SNIPPY_CLEAN.out.cleaned
+        )
+
+        SNP_DISTS (
+            SNP_SITES.out.snp_selected
+        )
+    }
 
     PANAROO (
         PULL.out.gff.collect()
@@ -57,4 +74,5 @@ workflow BACTRAIL_ANALYZE {
     IQTREE (
         PANAROO.out.core
     )
+
 }

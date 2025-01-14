@@ -1,0 +1,6 @@
+name: iqtree
+channels:
+  - conda-forge
+  - bioconda
+dependencies:
+  - bioconda::gubbins=3.4
