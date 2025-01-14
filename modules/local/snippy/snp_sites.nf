@@ -28,7 +28,7 @@ process SNP_SITES {
 
     cat << END_VERSION > version.yml
     "${task.process}":
-        snp-sites -V | cut -d ' ' -f 2
+        snp-sites: \$(snp-sites -V | cut -d ' ' -f 2)
     END_VERSION
     """
 
@@ -38,7 +38,7 @@ process SNP_SITES {
 
     cat << END_VERSION > version.yml
     "${task.process}":
-        snp-sites -V | cut -d ' ' -f 2
+        snp-sites: \$(snp-sites -V | cut -d ' ' -f 2)
     END_VERSION
     """
 }
