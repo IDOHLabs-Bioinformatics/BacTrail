@@ -1,10 +1,10 @@
 process UPDATE_DB {
-    tag "${id}"
+    tag "${meta.id}"
     label "process_single"
     maxForks 1
 
     input:
-    tuple val(organism), val(id), path(assembly), path(gff), path(snippy), path(clusters)
+    tuple val(organism), val(meta), path(assembly), path(gff), path(snippy), path(clusters)
     val db_name
 
     output:
@@ -15,9 +15,9 @@ process UPDATE_DB {
 
     script:
     """
-    python ${projectDir}/bin/update_db.py \\
+    update_db.py \\
         -d ${db_name} \\
-        -i ${id} \\
+        -i ${meta.id} \\
         -o ${organism} \\
         -a ${assembly} \\
         -g ${gff} \\

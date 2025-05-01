@@ -11,8 +11,8 @@ process SNIPPY {
     tuple val(meta), path(reads), path(ref)
 
     output:
-    tuple val(meta.id), path("${meta.id}_snippy"),                                 emit: results
-    path("version.yml"),                                                 emit: version
+    tuple val(meta), path("${meta.id}_snippy"), emit: results
+    path("version.yml"),                        emit: version
 
     when:
     task.ext.when == null || task.ext.when
