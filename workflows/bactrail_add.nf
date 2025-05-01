@@ -34,14 +34,8 @@ workflow BACTRAIL_ADD {
     ch_versions = Channel.empty()
     ch_multiqc_files = Channel.empty()
 
-    //
-    // MODULE: Grab organisms to make unique
-    //
-    GRAB_ORGANISM (
-        ch_samplesheet
-    )
-
-    GRAB_ORGANISM.out.organism
+    ch_samplesheet
+        .map { meta, reads, organism, reference -> organism }
         .unique()
         .set{ organisms }
 
@@ -58,25 +52,30 @@ workflow BACTRAIL_ADD {
     //
     SPADES (
         ch_samplesheet
-            .map{ meta, reads, reference -> tuple(meta, reads) }
+            .map{ meta, reads, organism, reference -> tuple(meta, reads) }
     )
 
     //
     // MODULE: Make popPUNK query file
     //
-    grouped_assemblies = SPADES.out.org_assembly.groupTuple()
     POPPUNK_QUERY (
-        grouped_assemblies
+        SPADES.out.assembly
+        .combine(ch_samplesheet, by:0)
+        .groupTuple(by:3)
+        .map { meta, assembly, reads, organism, reference -> tuple(organism, assembly)}
     )
 
     //
     // MODULE: popPUNK cluster assignment
     //
-    launch_poppunk = DATABASE_VERIFY.out.organism_schema
-        .join(POPPUNK_QUERY.out.query)
-        .join(grouped_assemblies)
     POPPUNK_ASSIGN (
-        launch_poppunk,
+        DATABASE_VERIFY.out.organism_schema
+        .combine(POPPUNK_QUERY.out.query, by:0)
+        .combine(SPADES.out.assembly
+                .combine(ch_samplesheet, by:0)
+                .groupTuple(by:3)
+                .map { meta, assembly, reads, organism, reference -> tuple(organism, assembly)}
+                , by:0),
         params.schema_dir
     )
 
@@ -90,20 +89,20 @@ workflow BACTRAIL_ADD {
     //
     // MODULE: Snippy
     //
-
     SNIPPY (
-        //ch_samplesheet.map{ meta, fastqs, reference, organism -> tuple(meta, fastqs, reference) }
         ch_samplesheet
+            .map{ meta, reads, organism, reference -> tuple(meta, reads, reference) }
     )
 
-    updating_ch = SPADES.out.id_assembly
-                    .join(PROKKA.out.gff)
-                    .join(SNIPPY.out.results)
-                    .map{ it -> [it[1], it[0], it[2], it[3], it[4]] }
-                    .combine(POPPUNK_ASSIGN.out.clusters, by:0)
-
     UPDATE_DB (
-        updating_ch,
+        SPADES.out.assembly
+        .join(PROKKA.out.gff)
+        .join(SNIPPY.out.results)
+        .join(ch_samplesheet
+                .map { meta, reads, organism, reference -> tuple(meta, organism) }
+        )
+        .map { meta, assembly, gff, snippy, organism -> tuple(organism, meta, assembly, gff, snippy) }
+        .combine(POPPUNK_ASSIGN.out.clusters, by: 0),
         params.db_name
     )
 

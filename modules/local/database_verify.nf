@@ -1,6 +1,6 @@
 process DATABASE_VERIFY {
     label 'process_low'
-    tag "${organism}"
+    tag "${organism[0]}"
 
     input:
     path(schema_dir)
@@ -12,9 +12,9 @@ process DATABASE_VERIFY {
 
     script:
     """
-    schema_path=\$(python ${projectDir}/bin/database_verify.py \\
+    schema_path=\$(database_verify.py \\
         -s ${schema_dir} \\
-        -o ${organism} \\
+        -o ${organism[0]} \\
         )
     ln -s ${schema_dir}/\$schema_path \$schema_path
     cat << END_VERSIONS > version.yml

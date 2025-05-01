@@ -1,6 +1,6 @@
 process POPPUNK_ASSIGN {
     label 'process_medium'
-    tag "${organism}"
+    tag "${organism[0]}"
 
     conda "${moduleDir}/environment.yml"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
@@ -12,7 +12,7 @@ process POPPUNK_ASSIGN {
     val(schema_base)
 
     output:
-    tuple val(organism), path("poppunk_clusters/poppunk_clusters_clusters.csv"), emit: clusters
+    tuple val(organism), path("*poppunk_clusters.csv"), emit: clusters
     path("version.yml"),                                                         emit: version
 
     when:
@@ -36,6 +36,8 @@ process POPPUNK_ASSIGN {
           --output poppunk_clusters \\
           ${args}
     fi
+
+    mv poppunk_clusters/poppunk_clusters_clusters.csv ${organism[0]}_poppunk_clusters.csv
 
     cat << END_VERSIONS > version.yml
     "${task.process}":

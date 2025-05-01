@@ -1,17 +1,17 @@
 process POPPUNK_QUERY {
     label 'process_low'
-    tag "${organism}"
+    tag "${organism[0]}"
 
     input:
     tuple val(organism), path(assemblies)
 
     output:
-    tuple val(organism), path("popPUNK_query.txt"), emit: query
+    tuple val(organism), path("*popPUNK_query.txt"), emit: query
     path("version.yml"),                            emit: verision
 
     script:
     """
-    python ${projectDir}/bin/make_poppunk_query.py -a '${assemblies}'
+    make_poppunk_query.py -a '${assemblies}' -o ${organism[0]}
 
     cat << END_VERSIONS > version.yml
     "${task.process}":

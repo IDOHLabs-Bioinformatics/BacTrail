@@ -29,7 +29,6 @@
             },
             "organism": {
                 "type": "string",
-                "meta": ["organism"],
                 "pattern": "^\\S+$",
                 "errorMessage": "The unabbreviated organism name must be provided with '_' replacing any spaces."
             },
