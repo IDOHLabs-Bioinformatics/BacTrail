@@ -17,6 +17,7 @@ include { SPADES                 } from '../modules/local/spades/spades.nf'
 include { POPPUNK_QUERY          } from '../modules/local/poppunk_query.nf'
 include { PROKKA                 } from '../modules/local/prokka/prokka.nf'
 include { UPDATE_DB              } from '../modules/local/database/update_db.nf'
+include { WRITE_STATUS           } from '../modules/local/database/write_status.nf'
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -93,7 +94,7 @@ workflow BACTRAIL_ADD {
         ch_samplesheet
             .map{ meta, reads, organism, reference -> tuple(meta, reads, reference) }
     )
-
+    params.replace.toString().capitalize()
     UPDATE_DB (
         SPADES.out.assembly
         .join(PROKKA.out.gff)
@@ -103,7 +104,14 @@ workflow BACTRAIL_ADD {
         )
         .map { meta, assembly, gff, snippy, organism -> tuple(organism, meta, assembly, gff, snippy) }
         .combine(POPPUNK_ASSIGN.out.clusters, by: 0),
-        params.db_name
+        params.db_name,
+        params.replace.toString().capitalize()
+    )
+
+    // UPDATE_DB.out.status.collect().view()
+
+    WRITE_STATUS(
+        UPDATE_DB.out.status.collect()
     )
 
     //

@@ -52,6 +52,7 @@ def parse():
     parser.add_argument('-v', '--vcf', required=True)
     parser.add_argument('-r', '--reference', required=True)
     parser.add_argument('-c', '--clusters', required=True)
+    parser.add_argument('--replace', action='store_true')
     arguments = parser.parse_args()
 
     return arguments
@@ -60,6 +61,7 @@ def parse():
 if __name__ == '__main__':
     # initialize variables
     args = parse()
+    print(args.replace)
 
     # open the database
     with closing(sqlite3.connect(args.db_name)) as conn:
@@ -77,10 +79,20 @@ if __name__ == '__main__':
                 "CREATE TABLE reference_genomes (organism TEXT PRIMARY KEY, sequence TEXT)")
 
         # insert data
-        cluster = find_cluster_id(args.id, args.clusters)
-        cursor.execute("INSERT INTO intermediate VALUES (?, ?, ?, ?, ?, ?, ?)",
-                       (args.id, args.organism, contents(args.assembly),
-                        contents(args.gff), contents(args.fasta), contents(args.vcf), cluster))
+        try:
+            cluster = find_cluster_id(args.id, args.clusters)
+            cursor.execute("INSERT INTO intermediate VALUES (?, ?, ?, ?, ?, ?, ?)",
+                           (args.id, args.organism, contents(args.assembly),
+                            contents(args.gff), contents(args.fasta), contents(args.vcf), cluster))
+            print(f'{args.id},updated')
+        except sqlite3.IntegrityError:
+            if args.replace:
+                cursor.execute("INSERT OR REPLACE INTO intermediate VALUES (?, ?, ?, ?, ?, ?, ?)",
+                               (args.id, args.organism, contents(args.assembly),
+                                contents(args.gff), contents(args.fasta), contents(args.vcf), cluster))
+                print(f'{args.id},overwritten')
+            else:
+                print(f'{args.id},not updated')
 
         # insert reference genome if not present
         reference_insert(cursor, args.organism, contents(args.reference))

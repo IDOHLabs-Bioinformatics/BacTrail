@@ -16,7 +16,7 @@ process PULL {
 
     script:
     """
-    name=\$(python ${projectDir}/bin/db_pull.py -o ${organism} -d ${database})
+    name=\$(db_pull.py -o ${organism} -d ${database})
 
     cat << END_VERSIONS > version.yml
     "${task.process}":

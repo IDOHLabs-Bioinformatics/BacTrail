@@ -6,8 +6,10 @@ process UPDATE_DB {
     input:
     tuple val(organism), val(meta), path(assembly), path(gff), path(snippy), path(clusters)
     val db_name
+    val replace
 
     output:
+    env(status),            emit: status
     path("version.yml"), emit: version
 
     when:
@@ -15,16 +17,34 @@ process UPDATE_DB {
 
     script:
     """
-    update_db.py \\
-        -d ${db_name} \\
-        -i ${meta.id} \\
-        -o ${organism} \\
-        -a ${assembly} \\
-        -g ${gff} \\
-        -f ${snippy}/snps.aligned.fa \\
-        -v ${snippy}/snps.vcf \\
-        -r ${snippy}/reference/ref.fa \\
-        -c ${clusters}
+    if [ "${replace}" == "False" ]; then
+      echo top
+      echo ${replace}
+      status=\$(update_db.py \\
+          -d ${db_name} \\
+          -i ${meta.id} \\
+          -o ${organism[0]} \\
+          -a ${assembly} \\
+          -g ${gff} \\
+          -f ${snippy}/snps.aligned.fa \\
+          -v ${snippy}/snps.vcf \\
+          -r ${snippy}/reference/ref.fa \\
+          -c ${clusters})
+    else
+      echo bottom
+      echo ${replace}
+      status=\$(update_db.py \\
+          -d ${db_name} \\
+          -i ${meta.id} \\
+          -o ${organism[0]} \\
+          -a ${assembly} \\
+          -g ${gff} \\
+          -f ${snippy}/snps.aligned.fa \\
+          -v ${snippy}/snps.vcf \\
+          -r ${snippy}/reference/ref.fa \\
+          -c ${clusters} \\
+          --replace)
+    fi
 
     cat << END_VERSIONS > version.yml
     "${task.process}":

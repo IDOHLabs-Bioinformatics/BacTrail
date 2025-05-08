@@ -56,6 +56,11 @@
                     "type": "string",
                     "description": "Select which mode to use, either 'add' or 'analyze'.",
                     "pattern": "add|analyze"
+                },
+                "replace": {
+                    "type": "boolean",
+                    "description": "Set to True to overwrite samples if already present in the database.",
+                    "pattern": "true|false|True|False"
                 }
             }
         },
