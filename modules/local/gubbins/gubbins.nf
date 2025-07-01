@@ -4,8 +4,8 @@ process GUBBINS {
 
     conda "${moduleDir}/environment.yml"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
-        'https://depot.galaxyproject.org/singularity/gubbins:3.4--py39pl5321he4a0461_0' :
-        'biocontainers/gubbins:3.4--py39pl5321he4a0461_0' }"
+        'https://depot.galaxyproject.org/singularity/gubbins:3.4--py39pl5321h577a1d6_2' :
+        'quay.io/biocontainers/gubbins:3.4--py39pl5321h577a1d6_2' }"
 
     input:
     path(cleaned_alignment)
@@ -17,6 +17,7 @@ process GUBBINS {
     task.ext.when == null || task.ext.when
 
     script:
+    // TODO: add option for different prefix
     def args = task.ext.args ?: ''
     """
     run_gubbins.py \\

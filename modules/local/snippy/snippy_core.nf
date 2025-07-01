@@ -29,7 +29,6 @@ process SNIPPY_CORE {
     script:
     def args = task.ext.args ?: ''
     """
-    directories=''
     for file in *.fasta; do
       handle=\$(echo \$file | awk -F '.fasta' '{print\$1}')
       mkdir \$handle
