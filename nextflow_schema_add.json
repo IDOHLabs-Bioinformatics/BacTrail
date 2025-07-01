@@ -44,7 +44,7 @@
                 "schema_dir": {
                     "type": "string",
                     "format": "directory-path",
-                    "description": "The directory which contains the schemas for chewBBACA. This same path should be used for all runs of BacTrail.",
+                    "description": "The directory which contains the schemas for PopPUNK. This same path should be used for all runs of BacTrail.",
                     "fa_icon": "fas fa-folder-open"
                 },
                 "db_name": {
@@ -61,6 +61,10 @@
                     "type": "boolean",
                     "description": "Set to True to overwrite samples if already present in the database.",
                     "pattern": "true|false|True|False"
+                },
+                "remove_recombinants": {
+                    "type": "boolean",
+                    "description": "Set to true if gubbins should be run to remove recombinants"
                 }
             }
         },
