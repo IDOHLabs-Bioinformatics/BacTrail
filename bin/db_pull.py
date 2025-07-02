@@ -2,13 +2,14 @@
 
 import argparse
 import sqlite3
+import zlib
 from contextlib import closing
 
 
 def build_file(name, contents, ftype):
     handle = '{}.{}'.format(name, ftype)
     with open(handle, 'w') as file:
-        file.write(contents)
+        file.write(zlib.decompress(contents).decode('utf-8'))
 
 
 def parse():
@@ -21,6 +22,7 @@ def parse():
 
 
 if __name__ == '__main__':
+    # TODO: Add cluster, sampleID_list to query searches
     # initialize variables
     organism, database = parse()
 

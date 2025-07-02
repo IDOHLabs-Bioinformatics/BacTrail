@@ -3,6 +3,7 @@
 import argparse
 
 import sqlite3
+import zlib
 from contextlib import closing
 
 
@@ -24,10 +25,13 @@ def reference_insert(c, organism, ref):
         c.execute("INSERT INTO reference_genomes VALUES (?, ?)", (organism, ref))
 
 
-def contents(path):
+def contents(path, compress=True):
     with open(path, 'r') as infile:
         data = infile.readlines()
         data = ''.join(data)
+
+    if compress:
+        data = zlib.compress(data.encode('utf-8'), level=7)
 
     return data
 
