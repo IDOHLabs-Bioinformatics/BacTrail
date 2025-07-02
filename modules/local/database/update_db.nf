@@ -18,8 +18,6 @@ process UPDATE_DB {
     script:
     """
     if [ "${replace}" == "False" ]; then
-      echo top
-      echo ${replace}
       status=\$(update_db.py \\
           -d ${db_name} \\
           -i ${meta.id} \\
@@ -31,8 +29,6 @@ process UPDATE_DB {
           -r ${snippy}/reference/ref.fa \\
           -c ${clusters})
     else
-      echo bottom
-      echo ${replace}
       status=\$(update_db.py \\
           -d ${db_name} \\
           -i ${meta.id} \\

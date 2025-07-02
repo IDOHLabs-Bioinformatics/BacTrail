@@ -12,7 +12,7 @@ process SNP_DISTS {
     path(cleaned_alignment)
 
     output:
-    path("dists.txt"),      emit: snp_selected
+    path("dists.tsv"),      emit: snp_selected
     path("version.yml"),    emit: version
 
     when:
@@ -20,7 +20,7 @@ process SNP_DISTS {
 
     script:
     """
-    snp-dists ${cleaned_alignment} > dists.txt
+    snp-dists ${cleaned_alignment} > dists.tsv
 
     cat << END_VERSION > version.yml
     "${task.process}":
