@@ -69,6 +69,10 @@
                     "type": "boolean",
                     "description": "Set to True to overwrite samples if already present in the database.",
                     "pattern": "true|false|True|False"
+                },
+                "cluster": {
+                    "type": "string",
+                    "description": "The ID of the cluster to analyze. If not provided all isolates from the provided organism will be analyzed"
                 }
             }
         },

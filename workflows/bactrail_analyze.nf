@@ -24,12 +24,14 @@ workflow BACTRAIL_ANALYZE {
     take:
     organism
     db_name
+    cluster
 
     main:
 
     PULL (
         organism,
-        db_name
+        db_name,
+        cluster
     )
 
     SNIPPY_CORE (

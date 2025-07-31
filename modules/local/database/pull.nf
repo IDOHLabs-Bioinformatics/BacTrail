@@ -2,9 +2,14 @@ process PULL {
     tag "Pull"
     label "process_low"
 
+    container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
+        'staphb/pandas' :
+        'quay.io/staphb/pandas' }"
+
     input:
     val(organism)
     val(database)
+    val(cluster)
 
     output:
     path('*.fasta'),     emit: fasta
@@ -16,7 +21,7 @@ process PULL {
 
     script:
     """
-    name=\$(db_pull.py -o ${organism} -d ${database})
+    db_pull.py -o ${organism} -d ${database} -c ${cluster}
 
     cat << END_VERSIONS > version.yml
     "${task.process}":

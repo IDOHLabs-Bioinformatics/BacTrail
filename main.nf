@@ -74,6 +74,7 @@ workflow NFCORE_BACTRAIL_ANALYZE {
     take:
     organism // channel: organism read in from --organism
     db_name  // channel: database name read in from --db_name
+    cluster  // channel: the cluster to analyze if provided
 
     main:
 
@@ -82,7 +83,8 @@ workflow NFCORE_BACTRAIL_ANALYZE {
     //
     BACTRAIL_ANALYZE(
         organism,
-        db_name
+        db_name,
+        cluster
     )
 
 }
@@ -145,7 +147,8 @@ workflow {
         //
         NFCORE_BACTRAIL_ANALYZE (
             params.organism,
-            params.db_name
+            params.db_name,
+            params.cluster
         )
 
         //
