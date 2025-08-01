@@ -26,56 +26,42 @@ include { workflowCitation          } from '../../nf-core/utils_nfcore_pipeline'
 ========================================================================================
 */
 
-workflow PIPELINE_INITIALISATION_ADD {
+workflow PIPELINE_INITIALISATION {
 
     take:
-    version           // boolean: Display version and exit
-    help              // boolean: Display help text
-    validate_params   // boolean: Boolean whether to validate parameters against the schema at runtime
-    monochrome_logs   // boolean: Do not use coloured log outputs
-    nextflow_cli_args //   array: List of positional nextflow CLI args
-    outdir            //  string: The output directory where the results will be saved
-    input             //  string: Path to input samplesheet
+    version             // boolean: Display version and exit
+    help                // boolean: Display help text
+    validate_params     // boolean: Boolean whether to validate parameters against the schema at runtime
+    monochrome_logs     // boolean: Do not use coloured log outputs
+    nextflow_cli_args   //   array: List of positional nextflow CLI args
+    outdir              //  string: The output directory where the results will be saved
+    input               //  string: Path to input samplesheet
+    schema_dir          //  string: The path the to the directory that holds the schemas for the ADD workflow
+    db_name             //  string: The path to the isolate database
+    cluster             //  string: Which cluster to analyze for the ANALYZE workflow
+    remove_recombinants // boolean: Whether to use Gubbins to remove recombinants for the ANALYZE workflow
+    replace             // boolean: Whether to overwrite an isolate in the database if already present in the ADD workflow
+    mode                //  string: The workflow entry used
 
     main:
 
     ch_versions = Channel.empty()
 
     //
-    // Print version and exit if required and dump pipeline parameters to JSON file
+    // Check the mode specific parameters
     //
-    UTILS_NEXTFLOW_PIPELINE (
-        version,
-        true,
-        outdir,
-        workflow.profile.tokenize(',').intersect(['conda', 'mamba']).size() >= 1
-    )
 
-    //
-    // Validate parameters and generate parameter summary to stdout
-    //
-    pre_help_text = nfCoreLogo(monochrome_logs)
-    post_help_text = '\n' + workflowCitation() + '\n' + dashedLine(monochrome_logs)
-    def String workflow_command = "nextflow run ${workflow.manifest.name} -profile <docker/singularity/.../institute> --input samplesheet.csv --outdir <OUTDIR>"
-    UTILS_NFVALIDATION_PLUGIN (
-        help,
-        workflow_command,
-        pre_help_text,
-        post_help_text,
-        validate_params,
-        "nextflow_schema_add.json"
-    )
+    if (mode == 'add') {
+        if (!new File(input).exists()) {
+            println("ERROR: The input samplesheet ${input} does not exist.")
+            System.exit(1)
+        }
+        if (!new File(schema_dir).exists() || !new File(schema_dir).isDirectory()) {
+            println("ERROR: The input schema directory ${schema_dir} either does not exist or is not a directory.")
+            System.exit(1)
+        }
 
-    //
-    // Check config provided to the pipeline
-    //
-    UTILS_NFCORE_PIPELINE (
-        nextflow_cli_args
-    )
-    //
-    // Custom validation for pipeline parameters
-    //
-    validateInputParameters()
+        assert replace instanceof Boolean
 
     //
     // Create channel from input file provided through params.input
@@ -100,34 +86,25 @@ workflow PIPELINE_INITIALISATION_ADD {
         }
         .set { ch_samplesheet }
 
-    //
-    // Create channel from reference
-    //
+    }
+    else if (mode == 'analyze') {
+        if (!new File(schema_dir).exists() || !new File(schema_dir).isDirectory()) {
+            println("ERROR: The input schema directory ${schema_dir} either does not exist or is not a directory.")
+            System.exit(1)
+        }
+        if (!new File(db_name).exists()) {
+            println("ERROR: The input isolate database ${input} does not exist.")
+            System.exit(1)
+        }
 
-    emit:
-    samplesheet = ch_samplesheet
-    versions    = ch_versions
-}
+        ch_samplesheet = Channel.empty()
 
-/*
-========================================================================================
-    SUBWORKFLOW TO INITIALISE PIPELINE FOR ANALYZE
-========================================================================================
-*/
-
-workflow PIPELINE_INITIALISATION_ANALYZE {
-
-    take:
-    version           // boolean: Display version and exit
-    help              // boolean: Display help text
-    validate_params   // boolean: Boolean whether to validate parameters against the schema at runtime
-    monochrome_logs   // boolean: Do not use coloured log outputs
-    nextflow_cli_args //   array: List of positional nextflow CLI args
-    outdir            //  string: The output directory where the results will be saved
-
-    main:
-
-    ch_versions = Channel.empty()
+        assert remove_recombinants instanceof Boolean
+    }
+    else {
+        println("ERROR: ${mode} is not one of the acceptable 'ADD' OR 'ANALYZE'.")
+        System.exit(1)
+    }
 
     //
     // Print version and exit if required and dump pipeline parameters to JSON file
@@ -151,7 +128,7 @@ workflow PIPELINE_INITIALISATION_ANALYZE {
         pre_help_text,
         post_help_text,
         validate_params,
-        "nextflow_schema_analyze.json"
+        "nextflow_schema.json"
     )
 
     //
@@ -160,16 +137,16 @@ workflow PIPELINE_INITIALISATION_ANALYZE {
     UTILS_NFCORE_PIPELINE (
         nextflow_cli_args
     )
-
     //
     // Custom validation for pipeline parameters
     //
     validateInputParameters()
 
-
     emit:
+    samplesheet = ch_samplesheet
     versions    = ch_versions
 }
+
 
 /*
 ========================================================================================

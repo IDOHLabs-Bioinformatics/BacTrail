@@ -17,12 +17,11 @@ nextflow.enable.dsl = 2
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
 
-include { BACTRAIL_ADD                    } from './workflows/bactrail_add'
-include { BACTRAIL_ANALYZE                } from './workflows/bactrail_analyze'
-include { PIPELINE_INITIALISATION_ADD     } from './subworkflows/local/utils_nfcore_bactrail_pipeline'
-include { PIPELINE_INITIALISATION_ANALYZE } from './subworkflows/local/utils_nfcore_bactrail_pipeline'
-include { PIPELINE_COMPLETION_ADD         } from './subworkflows/local/utils_nfcore_bactrail_pipeline'
-include { PIPELINE_COMPLETION_ANALYZE     } from './subworkflows/local/utils_nfcore_bactrail_pipeline'
+include { BACTRAIL_ADD                 } from './workflows/bactrail_add'
+include { BACTRAIL_ANALYZE             } from './workflows/bactrail_analyze'
+include { PIPELINE_INITIALISATION      } from './subworkflows/local/utils_nfcore_bactrail_pipeline'
+include { PIPELINE_COMPLETION_ADD      } from './subworkflows/local/utils_nfcore_bactrail_pipeline'
+include { PIPELINE_COMPLETION_ANALYZE  } from './subworkflows/local/utils_nfcore_bactrail_pipeline'
 
 
 include { getGenomeAttribute              } from './subworkflows/local/utils_nfcore_bactrail_pipeline'
@@ -96,19 +95,27 @@ workflow NFCORE_BACTRAIL_ANALYZE {
 
 workflow ADD {
 
-    PIPELINE_INITIALISATION_ADD (
+    def mode = 'add'
+
+    PIPELINE_INITIALISATION (
         params.version,
         params.help,
         params.validate_params,
         params.monochrome_logs,
         args,
         params.outdir,
-        params.input
+        params.input,
+        params.schema_dir,
+        params.db_name,
+        params.cluster,
+        params.remove_recombinants,
+        params.replace,
+        mode
     )
 
     NFCORE_BACTRAIL_ADD (
-            PIPELINE_INITIALISATION_ADD.out.samplesheet
-        )
+        PIPELINE_INITIALISATION.out.samplesheet
+    )
 
     PIPELINE_COMPLETION_ADD (
         params.email,
@@ -124,13 +131,22 @@ workflow ADD {
 
 workflow ANALYZE {
 
-    PIPELINE_INITIALISATION_ANALYZE (
+    def mode = 'analyze'
+
+    PIPELINE_INITIALISATION (
         params.version,
         params.help,
         params.validate_params,
         params.monochrome_logs,
         args,
-        params.outdir
+        params.outdir,
+        params.input,
+        params.schema_dir,
+        params.db_name,
+        params.cluster,
+        params.remove_recombinants,
+        params.replace,
+        mode
     )
 
     NFCORE_BACTRAIL_ANALYZE (
