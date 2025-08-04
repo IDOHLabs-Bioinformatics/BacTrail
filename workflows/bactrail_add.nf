@@ -36,7 +36,7 @@ workflow BACTRAIL_ADD {
     ch_multiqc_files = Channel.empty()
 
     ch_samplesheet
-        .map { meta, reads, organism, reference -> organism }
+        .map { meta, reads, organism, reference, collection_date -> organism }
         .unique()
         .set{ organisms }
 
@@ -53,7 +53,7 @@ workflow BACTRAIL_ADD {
     //
     SPADES (
         ch_samplesheet
-            .map{ meta, reads, organism, reference -> tuple(meta, reads) }
+            .map{ meta, reads, organism, reference, collection_date -> tuple(meta, reads) }
     )
 
     //
@@ -63,7 +63,7 @@ workflow BACTRAIL_ADD {
         SPADES.out.assembly
         .combine(ch_samplesheet, by:0)
         .groupTuple(by:3)
-        .map { meta, assembly, reads, organism, reference -> tuple(organism, assembly)}
+        .map { meta, assembly, reads, organism, reference, collection_date -> tuple(organism, assembly)}
     )
 
     //
@@ -75,7 +75,7 @@ workflow BACTRAIL_ADD {
         .combine(SPADES.out.assembly
                 .combine(ch_samplesheet, by:0)
                 .groupTuple(by:3)
-                .map { meta, assembly, reads, organism, reference -> tuple(organism, assembly)}
+                .map { meta, assembly, reads, organism, reference, collection_date -> tuple(organism, assembly)}
                 , by:0),
         params.schema_dir
     )
@@ -92,17 +92,17 @@ workflow BACTRAIL_ADD {
     //
     SNIPPY (
         ch_samplesheet
-            .map{ meta, reads, organism, reference -> tuple(meta, reads, reference) }
+            .map{ meta, reads, organism, reference, collection_date -> tuple(meta, reads, reference) }
     )
-    params.replace.toString().capitalize()
+
     UPDATE_DB (
         SPADES.out.assembly
         .join(PROKKA.out.gff)
         .join(SNIPPY.out.results)
         .join(ch_samplesheet
-                .map { meta, reads, organism, reference -> tuple(meta, organism) }
+                .map { meta, reads, organism, reference, collection_date -> tuple(meta, organism, collection_date) }
         )
-        .map { meta, assembly, gff, snippy, organism -> tuple(organism, meta, assembly, gff, snippy) }
+        .map { meta, assembly, gff, snippy, organism, collection_date -> tuple(organism, meta, assembly, gff, snippy, collection_date) }
         .combine(POPPUNK_ASSIGN.out.clusters, by: 0),
         params.db_name,
         params.replace.toString().capitalize()

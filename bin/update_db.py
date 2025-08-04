@@ -56,6 +56,7 @@ def parse():
     parser.add_argument('-v', '--vcf', required=True)
     parser.add_argument('-r', '--reference', required=True)
     parser.add_argument('-c', '--clusters', required=True)
+    parser.add_argument('-s', '--collection_date', required=True)
     parser.add_argument('--replace', action='store_true')
     arguments = parser.parse_args()
 
@@ -65,7 +66,6 @@ def parse():
 if __name__ == '__main__':
     # initialize variables
     args = parse()
-    print(args.replace)
 
     # open the database
     with closing(sqlite3.connect(args.db_name)) as conn:
@@ -75,7 +75,7 @@ if __name__ == '__main__':
         # make the intermediate table if not already there
         if not check_table(cursor, 'intermediate'):
             cursor.execute(
-                "CREATE TABLE intermediate (ID TEXT PRIMARY KEY, organism TEXT, assembly TEXT, gff TEXT, aligned TEXT, vcf TEXT, cluster TEXT)")
+                "CREATE TABLE intermediate (ID TEXT PRIMARY KEY, organism TEXT, assembly TEXT, gff TEXT, aligned TEXT, vcf TEXT, cluster TEXT, collection_date TEXT)")
 
         # make the reference genome table if not already there
         if not check_table(cursor, 'reference_genomes'):
@@ -85,15 +85,15 @@ if __name__ == '__main__':
         # insert data
         try:
             cluster = find_cluster_id(args.id, args.clusters)
-            cursor.execute("INSERT INTO intermediate VALUES (?, ?, ?, ?, ?, ?, ?)",
+            cursor.execute("INSERT INTO intermediate VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
                            (args.id, args.organism, contents(args.assembly),
-                            contents(args.gff), contents(args.fasta), contents(args.vcf), cluster))
+                            contents(args.gff), contents(args.fasta), contents(args.vcf), cluster, args.collection_date))
             print(f'{args.id},updated')
         except sqlite3.IntegrityError:
             if args.replace:
-                cursor.execute("INSERT OR REPLACE INTO intermediate VALUES (?, ?, ?, ?, ?, ?, ?)",
+                cursor.execute("INSERT OR REPLACE INTO intermediate VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
                                (args.id, args.organism, contents(args.assembly),
-                                contents(args.gff), contents(args.fasta), contents(args.vcf), cluster))
+                                contents(args.gff), contents(args.fasta), contents(args.vcf), cluster, args.collection_date))
                 print(f'{args.id},overwritten')
             else:
                 print(f'{args.id},not updated')

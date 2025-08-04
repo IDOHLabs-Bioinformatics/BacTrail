@@ -4,7 +4,7 @@ process UPDATE_DB {
     maxForks 1
 
     input:
-    tuple val(organism), val(meta), path(assembly), path(gff), path(snippy), path(clusters)
+    tuple val(organism), val(meta), path(assembly), path(gff), path(snippy), val(collection_date), path(clusters)
     val db_name
     val replace
 
@@ -27,7 +27,8 @@ process UPDATE_DB {
           -f ${snippy}/snps.aligned.fa \\
           -v ${snippy}/snps.vcf \\
           -r ${snippy}/reference/ref.fa \\
-          -c ${clusters})
+          -c ${clusters} \\
+          -s ${collection_date[0]})
     else
       status=\$(update_db.py \\
           -d ${db_name} \\
@@ -39,6 +40,7 @@ process UPDATE_DB {
           -v ${snippy}/snps.vcf \\
           -r ${snippy}/reference/ref.fa \\
           -c ${clusters} \\
+          -s ${collection_date[0]} \\
           --replace)
     fi
 

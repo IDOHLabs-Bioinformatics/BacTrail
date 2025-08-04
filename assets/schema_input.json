@@ -38,8 +38,13 @@
                 "exists": true,
                 "pattern": "^\\S+.fasta$",
                 "errorMessage": "The reference genome should the absolute path the the fasta file."
+            },
+            "collection_date": {
+                "type": "string",
+                "pattern": "[0-9][0-9]-[0-9][0-9]-[0-9][0-9][0-9][0-9]",
+                "errorMessage": "The collection_date field should be in DD-MM-YYYY format."
             }
         },
-        "required": ["sample", "fastq_1", "organism", "reference"]
+        "required": ["sample", "fastq_1", "organism", "reference", "collection_date"]
     }
 }
