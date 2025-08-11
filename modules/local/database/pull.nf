@@ -10,18 +10,20 @@ process PULL {
     val(organism)
     val(database)
     val(cluster)
+    val(collection_date_start)
+    val(collection_date_end)
 
     output:
-    path('*.fasta'),     emit: fasta
-    path("*.fna"),       emit: reference
-    path('*.gff'),       emit: gff
-    path('*.aligned.fa'),       emit: aln
-    path('*.vcf'),       emit: vcf
-    path("version.yml"), emit: version
+    path('*.fasta'),      emit: fasta
+    path("*.fna"),        emit: reference
+    path('*.gff'),        emit: gff
+    path('*.aligned.fa'), emit: aln
+    path('*.vcf'),        emit: vcf
+    path("version.yml"),  emit: version
 
     script:
     """
-    db_pull.py -o ${organism} -d ${database} -c ${cluster}
+    db_pull.py -o ${organism} -d ${database} -c ${cluster} -s ${collection_date_start} -e ${collection_date_end}
 
     cat << END_VERSIONS > version.yml
     "${task.process}":

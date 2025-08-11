@@ -2,6 +2,9 @@
 // Subworkflow with functionality specific to the nf-core/bactrail pipeline
 //
 
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter
+
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     IMPORT FUNCTIONS / MODULES / SUBWORKFLOWS
@@ -29,19 +32,22 @@ include { workflowCitation          } from '../../nf-core/utils_nfcore_pipeline'
 workflow PIPELINE_INITIALISATION {
 
     take:
-    version             // boolean: Display version and exit
-    help                // boolean: Display help text
-    validate_params     // boolean: Boolean whether to validate parameters against the schema at runtime
-    monochrome_logs     // boolean: Do not use coloured log outputs
-    nextflow_cli_args   //   array: List of positional nextflow CLI args
-    outdir              //  string: The output directory where the results will be saved
-    input               //  string: Path to input samplesheet
-    schema_dir          //  string: The path the to the directory that holds the schemas for the ADD workflow
-    db_name             //  string: The path to the isolate database
-    cluster             //  string: Which cluster to analyze for the ANALYZE workflow
-    remove_recombinants // boolean: Whether to use Gubbins to remove recombinants for the ANALYZE workflow
-    replace             // boolean: Whether to overwrite an isolate in the database if already present in the ADD workflow
-    mode                //  string: The workflow entry used
+    version                // boolean: Display version and exit
+    help                   // boolean: Display help text
+    validate_params        // boolean: Boolean whether to validate parameters against the schema at runtime
+    monochrome_logs        // boolean: Do not use coloured log outputs
+    nextflow_cli_args      //   array: List of positional nextflow CLI args
+    outdir                 //  string: The output directory where the results will be saved
+    input                  //  string: Path to input samplesheet
+    schema_dir             //  string: The path the to the directory that holds the schemas for the ADD workflow
+    db_name                //  string: The path to the isolate database
+    organism               //  string: The organism to analyze for the ANALYZE workflow
+    cluster                //  string: Which cluster to analyze for the ANALYZE workflow
+    remove_recombinants    // boolean: Whether to use Gubbins to remove recombinants for the ANALYZE workflow
+    replace                // boolean: Whether to overwrite an isolate in the database if already present in the ADD workflow
+    collection_date_start  //  string: The first date in the search range in the ANALYZE workflow
+    collection_date_end    //  string: The second date in the search range in the ANALYZE workflow
+    mode                   //  string: The workflow entry used
 
     main:
 
@@ -63,39 +69,49 @@ workflow PIPELINE_INITIALISATION {
 
         assert replace instanceof Boolean
 
-    //
-    // Create channel from input file provided through params.input
-    //
-    Channel
-        .fromSamplesheet("input")
-        .map {
-            meta, fastq_1, fastq_2, organism, reference, collection_date ->
-                if (!fastq_2) {
-                    return [ meta.id, meta + [ single_end:true ], [ fastq_1 ], organism, reference, collection_date ]
-                } else {
-                    return [ meta.id, meta + [ single_end:false ], [ fastq_1, fastq_2 ], organism, reference, collection_date ]
-                }
-        }
-        .groupTuple()
-        .map {
-            validateInputSamplesheet(it)
-        }
-        .map {
-            meta, fastqs, reference, organism, collection_date ->
-                return [ meta, fastqs.flatten(), organism, reference, collection_date ]
-        }
-        .set { ch_samplesheet }
+        //
+        // Create channel from input file provided through params.input
+        //
+        Channel
+            .fromSamplesheet("input")
+            .map {
+                meta, fastq_1, fastq_2, organism, reference, collection_date ->
+                    if (!fastq_2) {
+                        return [ meta.id, meta + [ single_end:true ], [ fastq_1 ], organism, reference, collection_date ]
+                    } else {
+                        return [ meta.id, meta + [ single_end:false ], [ fastq_1, fastq_2 ], organism, reference, collection_date ]
+                    }
+            }
+            .groupTuple()
+            .map {
+                validateInputSamplesheet(it)
+            }
+            .map {
+                meta, fastqs, reference, organism, collection_date ->
+                    return [ meta, fastqs.flatten(), organism, reference, collection_date ]
+            }
+            .set { ch_samplesheet }
 
     }
     else if (mode == 'analyze') {
-        if (!new File(schema_dir).exists() || !new File(schema_dir).isDirectory()) {
-            println("ERROR: The input schema directory ${schema_dir} either does not exist or is not a directory.")
-            System.exit(1)
-        }
+        // prepare dates to check
+        def formatter = DateTimeFormatter.ofPattern("MM-dd-yyyy")
+        def date1 = LocalDate.parse(collection_date_start, formatter)
+        def date2 = LocalDate.parse(collection_date_end, formatter)
+
         if (!new File(db_name).exists()) {
-            println("ERROR: The input isolate database ${input} does not exist.")
+            println("ERROR: The input isolate database ${db_name} does not exist.")
             System.exit(1)
         }
+        if (organism == 'empty') {
+            println("ERROR: Provide an organism to analyze.")
+            System.exit(1)
+        }
+        if (!date1.isBefore(date2)) {
+            println("ERROR: Collection date start is after collection date end.")
+            System.exit(1)
+        }
+
 
         ch_samplesheet = Channel.empty()
 

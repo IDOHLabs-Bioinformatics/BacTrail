@@ -19,6 +19,8 @@ def parse():
     parser.add_argument('-o', '--organism', required=True)
     parser.add_argument('-d', '--database', required=True)
     parser.add_argument('-c', '--cluster')
+    parser.add_argument('-s', '--collection_date_start')
+    parser.add_argument('-e', '--collection_date_end')
     arguments = parser.parse_args()
 
     return arguments
@@ -35,20 +37,37 @@ if __name__ == '__main__':
         cursor = conn.cursor()
 
         # pull data
-        data = pd.read_sql_query("SELECT id, assembly, gff, aligned, vcf, cluster, organism FROM intermediate WHERE organism = ?",
-                                 conn, params=[args.organism])
-
-        if args.cluster != 'all':
-            data = data[data['cluster'] == args.cluster]
-
-        # pull reference genome
-        reference = cursor.execute("SELECT sequence FROM reference_genomes WHERE organism = ?",
-                                   [args.organism]).fetchall()
+        data = pd.read_sql_query(
+            "SELECT id, assembly, gff, aligned, vcf, cluster, organism, collection_date FROM intermediate WHERE organism = ?",
+            conn, params=[args.organism])
 
         # if the organism is not present, raise an error
         if len(data) == 0:
             message = "Organism '{}' is not present in {}".format(args.organism, args.database)
             raise ValueError(message)
+
+        if args.cluster != 'all':
+            data = data[data['cluster'] == args.cluster]
+
+            if len(data) == 0:
+                message = "Cluster '{}' is not present in {}".format(args.cluster, args.database)
+                raise ValueError(message)
+
+        # address the logic
+        if args.collection_date_start != all and args.collection_date_end != all:
+            # convert to date format
+            data['collection_date'] = pd.to_datetime(data['collection_date'], format='%d-%m-%Y')
+            data = data.loc[(data['collection_date'] >= args.collection_date_start) and
+                            (data['collection_date'] <= args.collection_date_end)]
+
+            if len(data) == 0:
+                message = "There are no isolates in the date range provided ({} - {}) in {}".format(
+                    args.collection_date_start, args.collection_date_end, args.database)
+                raise ValueError(message)
+
+        # pull reference genome
+        reference = cursor.execute("SELECT sequence FROM reference_genomes WHERE organism = ?",
+                                   [args.organism]).fetchall()
 
         for row in data.values.tolist():
             build_file(row[0], row[1], 'fasta')

@@ -24,7 +24,7 @@ include { PIPELINE_COMPLETION_ADD      } from './subworkflows/local/utils_nfcore
 include { PIPELINE_COMPLETION_ANALYZE  } from './subworkflows/local/utils_nfcore_bactrail_pipeline'
 
 
-include { getGenomeAttribute              } from './subworkflows/local/utils_nfcore_bactrail_pipeline'
+include { getGenomeAttribute           } from './subworkflows/local/utils_nfcore_bactrail_pipeline'
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -71,9 +71,11 @@ workflow NFCORE_BACTRAIL_ADD {
 workflow NFCORE_BACTRAIL_ANALYZE {
 
     take:
-    organism // channel: organism read in from --organism
-    db_name  // channel: database name read in from --db_name
-    cluster  // channel: the cluster to analyze if provided
+    organism               // channel: organism read in from --organism
+    db_name                // channel: database name read in from --db_name
+    cluster                // channel: the cluster to analyze if provided
+    collection_date_start  // channel: the start date of the range to analyze
+    collection_date_end    // channel: the end date of the range to analyze
 
     main:
 
@@ -83,7 +85,9 @@ workflow NFCORE_BACTRAIL_ANALYZE {
     BACTRAIL_ANALYZE(
         organism,
         db_name,
-        cluster
+        cluster,
+        collection_date_start,
+        collection_date_end
     )
 
 }
@@ -107,9 +111,12 @@ workflow ADD {
         params.input,
         params.schema_dir,
         params.db_name,
+        params.organism,
         params.cluster,
         params.remove_recombinants,
         params.replace,
+        params.collection_date_start,
+        params.collection_date_end,
         mode
     )
 
@@ -143,16 +150,21 @@ workflow ANALYZE {
         params.input,
         params.schema_dir,
         params.db_name,
+        params.organism,
         params.cluster,
         params.remove_recombinants,
         params.replace,
+        params.collection_date_start,
+        params.collection_date_end,
         mode
     )
 
     NFCORE_BACTRAIL_ANALYZE (
         params.organism,
         params.db_name,
-        params.cluster
+        params.cluster,
+        params.collection_date_start,
+        params.collection_date_end
     )
 
     PIPELINE_COMPLETION_ANALYZE (
