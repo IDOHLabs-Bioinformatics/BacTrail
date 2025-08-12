@@ -27,7 +27,6 @@ def parse():
 
 
 if __name__ == '__main__':
-    # TODO: Add sampleID_list, date range to query searches
     # initialize variables
     args = parse()
 
@@ -53,11 +52,10 @@ if __name__ == '__main__':
                 message = "Cluster '{}' is not present in {}".format(args.cluster, args.database)
                 raise ValueError(message)
 
-        # address the logic
         if args.collection_date_start != all and args.collection_date_end != all:
             # convert to date format
-            data['collection_date'] = pd.to_datetime(data['collection_date'], format='%d-%m-%Y')
-            data = data.loc[(data['collection_date'] >= args.collection_date_start) and
+            data['collection_date'] = pd.to_datetime(data['collection_date'], format='%m-%d-%Y')
+            data = data.loc[(data['collection_date'] >= args.collection_date_start) &
                             (data['collection_date'] <= args.collection_date_end)]
 
             if len(data) == 0:
