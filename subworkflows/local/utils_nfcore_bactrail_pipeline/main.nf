@@ -41,6 +41,7 @@ workflow PIPELINE_INITIALISATION {
     input                  //  string: Path to input samplesheet
     schema_dir             //  string: The path the to the directory that holds the schemas for the ADD workflow
     db_name                //  string: The path to the isolate database
+    kraken2_db             //  string: The path to the kraken2 database to use for classification in the ADD workflow
     organism               //  string: The organism to analyze for the ANALYZE workflow
     cluster                //  string: Which cluster to analyze for the ANALYZE workflow
     remove_recombinants    // boolean: Whether to use Gubbins to remove recombinants for the ANALYZE workflow
@@ -64,6 +65,10 @@ workflow PIPELINE_INITIALISATION {
         }
         if (!new File(schema_dir).exists() || !new File(schema_dir).isDirectory()) {
             println("ERROR: The input schema directory ${schema_dir} either does not exist or is not a directory.")
+            System.exit(1)
+        }
+        if (!new File(kraken2_db).exists() || !new File(kraken2_db).isDirectory()) {
+            println("ERROR: The input schema directory ${kraken2_db} either does not exist or is not a directory.")
             System.exit(1)
         }
 

@@ -9,7 +9,7 @@ include { paramsSummaryMap       } from 'plugin/nf-validation'
 include { paramsSummaryMultiqc   } from '../subworkflows/nf-core/utils_nfcore_pipeline'
 include { softwareVersionsToYAML } from '../subworkflows/nf-core/utils_nfcore_pipeline'
 include { methodsDescriptionText } from '../subworkflows/local/utils_nfcore_bactrail_pipeline'
-include { GRAB_ORGANISM          } from '../modules/local/grab_organism.nf'
+include { KRAKEN2                } from '../modules/local/kraken/kraken2.nf'
 include { DATABASE_VERIFY        } from '../modules/local/database_verify.nf'
 include { POPPUNK_ASSIGN         } from '../modules/local/poppunk/poppunk_assign.nf'
 include { SNIPPY                 } from '../modules/local/snippy/snippy.nf'
@@ -41,9 +41,18 @@ workflow BACTRAIL_ADD {
         .set{ organisms }
 
     //
+    // MODULE: Kraken2
+    //
+    KRAKEN2 (
+        ch_samplesheet
+            .map{ meta, reads, organism, reference, collection_date -> tuple(meta, reads)},
+        params.kraken2_db
+    )
+
+    //
     // MODULE: Database verify
     //
-    DATABASE_VERIFY(
+    DATABASE_VERIFY (
         params.schema_dir,
         organisms
     )
