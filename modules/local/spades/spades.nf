@@ -46,6 +46,6 @@ process SPADES {
     cat << END_VERSIONS > version.yml
     "${task.process}":
         spades: \$(spades.py --version | cut -f 4 -d ' ')
+    END_VERSIONS
     """
-
 }
