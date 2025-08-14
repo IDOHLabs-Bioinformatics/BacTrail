@@ -57,6 +57,16 @@
                     "format": "directory-path",
                     "description": "Path to the kraken2 database to use for classification."
                 },
+                "reference_list": {
+                    "type": "string",
+                    "format": "file-path",
+                    "description": "Path to the file of reference paths for fastANI."
+                },
+                "reference_dir": {
+                    "type": "string",
+                    "format": "directory-path",
+                    "description": "Path to the directory containing all of the the references in the reference_list for fastANI."
+                },
                 "organism": {
                     "type": "string",
                     "description": "The organism of the samples to perform the analyze of."
