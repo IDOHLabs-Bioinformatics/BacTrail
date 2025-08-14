@@ -49,7 +49,9 @@ params.fasta = getGenomeAttribute('fasta')
 workflow NFCORE_BACTRAIL_ADD {
 
     take:
-    samplesheet // channel: samplesheet read in from --input
+    samplesheet    // channel: samplesheet read in from --input
+    reference_list // channel: file of list of references for fastANI
+    reference_dir  // channel: directory of references for fastANI
 
     main:
 
@@ -57,7 +59,9 @@ workflow NFCORE_BACTRAIL_ADD {
     // WORKFLOW: Run pipeline
     //
     BACTRAIL_ADD (
-        samplesheet
+        samplesheet,
+        reference_list,
+        reference_dir
     )
 
     emit:
@@ -112,6 +116,8 @@ workflow ADD {
         params.schema_dir,
         params.db_name,
         params.kraken2_db,
+        params.reference_list,
+        params.reference_dir,
         params.organism,
         params.cluster,
         params.remove_recombinants,
@@ -122,7 +128,9 @@ workflow ADD {
     )
 
     NFCORE_BACTRAIL_ADD (
-        PIPELINE_INITIALISATION.out.samplesheet
+        PIPELINE_INITIALISATION.out.samplesheet,
+        PIPELINE_INITIALISATION.out.reference_list,
+        PIPELINE_INITIALISATION.out.reference_dir
     )
 
     PIPELINE_COMPLETION_ADD (
@@ -152,6 +160,8 @@ workflow ANALYZE {
         params.schema_dir,
         params.db_name,
         params.kraken2_db,
+        params.reference_list,
+        params.reference_dir,
         params.organism,
         params.cluster,
         params.remove_recombinants,

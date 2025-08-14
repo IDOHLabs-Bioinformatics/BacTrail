@@ -42,6 +42,8 @@ workflow PIPELINE_INITIALISATION {
     schema_dir             //  string: The path the to the directory that holds the schemas for the ADD workflow
     db_name                //  string: The path to the isolate database
     kraken2_db             //  string: The path to the kraken2 database to use for classification in the ADD workflow
+    reference_list         //  string: The path to the reference list for fastANI in the ADD workflow
+    reference_dir          //  string: The path to the directory of references for fastANI in the ADD workflow
     organism               //  string: The organism to analyze for the ANALYZE workflow
     cluster                //  string: Which cluster to analyze for the ANALYZE workflow
     remove_recombinants    // boolean: Whether to use Gubbins to remove recombinants for the ANALYZE workflow
@@ -71,6 +73,15 @@ workflow PIPELINE_INITIALISATION {
             println("ERROR: The input schema directory ${kraken2_db} either does not exist or is not a directory.")
             System.exit(1)
         }
+
+        reference_list = reference_list ?: "${projectDir}/assets/fastANI_reference_list.txt"
+        Channel.fromPath(reference_list, checkIfExists: true)
+            .set { ch_reference_list }
+
+        reference_dir = reference_dir ?: "${projectDir}/assets/references"
+        Channel.fromPath(reference_dir, checkIfExists: true)
+            .set { ch_reference_dir }
+
 
         assert replace instanceof Boolean
 
@@ -118,7 +129,9 @@ workflow PIPELINE_INITIALISATION {
         }
 
 
-        ch_samplesheet = Channel.empty()
+        ch_samplesheet    = Channel.empty()
+        ch_reference_list = Channel.empty()
+        ch_reference_dir  = Channel.empty()
 
         assert remove_recombinants instanceof Boolean
     }
@@ -164,8 +177,10 @@ workflow PIPELINE_INITIALISATION {
     validateInputParameters()
 
     emit:
-    samplesheet = ch_samplesheet
-    versions    = ch_versions
+    samplesheet    = ch_samplesheet
+    reference_list = ch_reference_list
+    reference_dir  = ch_reference_dir
+    versions       = ch_versions
 }
 
 

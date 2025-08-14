@@ -14,6 +14,7 @@ include { DATABASE_VERIFY        } from '../modules/local/database_verify.nf'
 include { POPPUNK_ASSIGN         } from '../modules/local/poppunk/poppunk_assign.nf'
 include { SNIPPY                 } from '../modules/local/snippy/snippy.nf'
 include { SPADES                 } from '../modules/local/spades/spades.nf'
+include { FASTANI                } from '../modules/local/fastANI/fastANI.nf'
 include { POPPUNK_QUERY          } from '../modules/local/poppunk_query.nf'
 include { PROKKA                 } from '../modules/local/prokka/prokka.nf'
 include { UPDATE_DB              } from '../modules/local/database/update_db.nf'
@@ -28,7 +29,9 @@ include { WRITE_STATUS           } from '../modules/local/database/write_status.
 workflow BACTRAIL_ADD {
 
     take:
-    ch_samplesheet // channel: samplesheet read in from --input
+    ch_samplesheet    // channel: samplesheet read in from --input
+    ch_reference_list // channel: file of list of references for fastANI
+    ch_reference_dir  // channel: directory of the references that fastANI points to
 
     main:
 
@@ -63,6 +66,15 @@ workflow BACTRAIL_ADD {
     SPADES (
         ch_samplesheet
             .map{ meta, reads, organism, reference, collection_date -> tuple(meta, reads) }
+    )
+
+    //
+    // MODULE: fastANI
+    //
+    FASTANI (
+        SPADES.out.assembly,
+        ch_reference_list.first(),
+        ch_reference_dir.first()
     )
 
     //
