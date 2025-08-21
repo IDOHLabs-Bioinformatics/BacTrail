@@ -12,8 +12,9 @@ process KRAKEN2 {
     val(db)
 
     output:
-    tuple val(meta), path("*_kraken_report.txt"),
-    path("versions.yml")
+    tuple val(meta), path("*_kraken_report.txt"), emit: report
+    env("top_hit"),                               emit: top_hit
+    path("versions.yml"),                         emit: versions
 
     when:
     task.ext.when == null || task.ext.when
@@ -30,6 +31,8 @@ process KRAKEN2 {
         ${reads[0]} \\
         ${reads[1]} \\
         > /dev/null
+
+    top_hit=\$(awk '\$4 == "S"' ${prefix}_kraken_report.txt | sort -nrk2 | head -n 1 | awk -F '  ' '{print\$NF}' | sed 's/^[      ]*//' | sed 's/ /_/g')
 
     cat << END_VERSIONS > versions.yml
     "${task.process}":
