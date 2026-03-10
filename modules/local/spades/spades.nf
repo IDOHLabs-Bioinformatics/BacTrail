@@ -2,17 +2,14 @@ process SPADES {
     label 'process_high'
     tag "${meta.id}"
 
-    conda "${moduleDir}/environment.yml"
-    container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
-        'https://depot.galaxyproject.org/singularity/spades:4.0.0--h5fb382e_0' :
-        'biocontainers/spades:4.0.0--h5fb382e_0' }"
+    container "staphb/spades:4.2.0"
 
     input:
     tuple val(meta), path(reads)
 
     output:
-    tuple val(meta), path("assembly/*_assembly.fasta"),                emit: assembly
-    path("version.yml"),                                               emit: version
+    tuple val(meta), path("assembly/*_assembly.fasta"), emit: assembly
+    path("version.yml"),                                emit: version
 
     when:
     task.ext.when == null || task.ext.when

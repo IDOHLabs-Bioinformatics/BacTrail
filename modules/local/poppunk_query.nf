@@ -2,12 +2,14 @@ process POPPUNK_QUERY {
     label 'process_low'
     tag "${organism[0]}"
 
+    container "staphb/pandas:3.0.1"
+
     input:
     tuple val(organism), path(assemblies)
 
     output:
     tuple val(organism), path("*popPUNK_query.txt"), emit: query
-    path("version.yml"),                            emit: verision
+    path("version.yml"),                             emit: version
 
     script:
     """

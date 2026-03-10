@@ -2,6 +2,8 @@ process WRITE_STATUS {
     tag "status"
     label "process_single"
 
+    container "staphb/pandas:3.0.1"
+
     input:
     val(statuses)
 

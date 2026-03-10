@@ -2,10 +2,7 @@ process SNIPPY_CORE {
     label "process_medium"
     tag "snippy_core"
 
-    conda "${moduleDir}/environment.yml"
-    container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
-        'https://depot.galaxyproject.org/singularity/snippy:4.6.0--hdfd78af_1' :
-        'biocontainers/snippy:4.6.0--hdfd78af_1' }"
+    container "staphb/snippy:4.6.0"
 
     input:
     path(fasta)

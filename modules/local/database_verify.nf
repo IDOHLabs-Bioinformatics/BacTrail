@@ -2,6 +2,8 @@ process DATABASE_VERIFY {
     label 'process_low'
     tag "${organism[0]}"
 
+    container "staphb/pandas:3.0.1"
+
     input:
     path(schema_dir)
     val(organism)

@@ -2,9 +2,7 @@ process PULL {
     tag "Pull"
     label "process_low"
 
-    container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
-        'staphb/pandas' :
-        'quay.io/staphb/pandas' }"
+    container "staphb/pandas:3.0.1"
 
     input:
     val(organism)

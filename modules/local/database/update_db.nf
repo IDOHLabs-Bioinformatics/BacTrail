@@ -3,13 +3,15 @@ process UPDATE_DB {
     label "process_single"
     maxForks 1
 
+    container "staphb/pandas:3.0.1"
+
     input:
     tuple val(organism), val(meta), path(assembly), path(gff), path(snippy), val(collection_date), path(clusters)
     val db_name
     val replace
 
     output:
-    env(status),            emit: status
+    env(status),         emit: status
     path("version.yml"), emit: version
 
     when:

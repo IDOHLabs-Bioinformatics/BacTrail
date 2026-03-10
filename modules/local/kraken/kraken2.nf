@@ -2,10 +2,7 @@ process KRAKEN2 {
     label 'process_medium'
     tag "${meta.id}"
 
-    conda "${moduleDir}/environment.yml"
-    container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
-        'staphb/kraken2:2.1.1-no-db' :
-        'quay.io/staphb/kraken2:2.1.1-no-db' }"
+    container "staphb/kraken2:2.17.1"
 
     input:
     tuple val(meta), path(reads)

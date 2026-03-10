@@ -2,10 +2,7 @@ process GUBBINS {
     label 'process_medium'
     tag "recombinant removal"
 
-    conda "${moduleDir}/environment.yml"
-    container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
-        'https://depot.galaxyproject.org/singularity/gubbins:3.4--py39pl5321h577a1d6_2' :
-        'quay.io/biocontainers/gubbins:3.4--py39pl5321h577a1d6_2' }"
+    container "staphb/gubbins:3.4.1"
 
     input:
     path(cleaned_alignment)

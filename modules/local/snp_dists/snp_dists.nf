@@ -2,10 +2,7 @@ process SNP_DISTS {
     label "process_low"
     tag "snp_dists"
 
-    conda "${moduleDir}/environment.yml"
-    container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
-        'https://depot.galaxyproject.org/singularity/snp-dists:0.8.2--he4a0461_4' :
-        'biocontainers/snp-dists:0.8.2--he4a0461_4' }"
+    container "staphb/snp-dists:1.2.0"
 
 
     input:

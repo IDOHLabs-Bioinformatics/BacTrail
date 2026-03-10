@@ -2,10 +2,7 @@ process PROKKA {
     label "process_medium"
     tag "${meta.id}"
 
-    conda "${moduleDir}/environment.yml"
-    container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
-        'https://depot.galaxyproject.org/singularity/prokka:1.14.6--pl5321hdfd78af_5' :
-        'biocontainers/prokka:1.14.6--pl5321hdfd78af_5' }"
+    container "staphb/prokka:1.15.6"
 
     input:
     tuple val(meta), path(assembly)

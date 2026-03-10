@@ -2,10 +2,7 @@ process IQTREE {
     label "process_medium"
     tag "tree_build"
 
-    conda "${moduleDir}/environment.yml"
-    container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
-        'https://depot.galaxyproject.org/singularity/iqtree:2.3.4--h21ec9f0_0' :
-        'biocontainers/iqtree:2.3.4--h21ec9f0_0' }"
+    container "staphb/iqtree:1.6.7"
 
     input:
     path(aln)
@@ -22,6 +19,7 @@ process IQTREE {
 
     script:
     def args = task.ext.args ?: ''
+    // TODO: What if there are only 2 sequences? Do I catch or just assume that this a non-issue
     """
     iqtree \\
         -s ${aln} \\
