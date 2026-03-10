@@ -9,11 +9,14 @@ include { paramsSummaryMap       } from 'plugin/nf-validation'
 include { paramsSummaryMultiqc   } from '../subworkflows/nf-core/utils_nfcore_pipeline'
 include { softwareVersionsToYAML } from '../subworkflows/nf-core/utils_nfcore_pipeline'
 include { methodsDescriptionText } from '../subworkflows/local/utils_nfcore_bactrail_pipeline'
+include { FASTP                  } from '../modules/local/fastp/main.nf'
 include { KRAKEN2                } from '../modules/local/kraken/kraken2.nf'
 include { DATABASE_VERIFY        } from '../modules/local/database_verify.nf'
 include { POPPUNK_ASSIGN         } from '../modules/local/poppunk/poppunk_assign.nf'
 include { SNIPPY                 } from '../modules/local/snippy/snippy.nf'
 include { SPADES                 } from '../modules/local/spades/spades.nf'
+include { FILTER_CONTIGS         } from '../modules/local/seqtk/main.nf'
+include { QUAST                  } from '../modules/local/quast/main.nf'
 include { FASTANI                } from '../modules/local/fastANI/fastANI.nf'
 include { POPPUNK_QUERY          } from '../modules/local/poppunk_query.nf'
 include { PROKKA                 } from '../modules/local/prokka/prokka.nf'
@@ -44,15 +47,6 @@ workflow BACTRAIL_ADD {
         .set{ organisms }
 
     //
-    // MODULE: Kraken2
-    //
-    KRAKEN2 (
-        ch_samplesheet
-            .map{ meta, reads, organism, reference, collection_date -> tuple(meta, reads)},
-        params.kraken2_db
-    )
-
-    //
     // MODULE: Database verify
     //
     DATABASE_VERIFY (
@@ -61,11 +55,33 @@ workflow BACTRAIL_ADD {
     )
 
     //
+    // MODULE: fastp
+    FASTP (
+        ch_samplesheet
+            .map{ meta, reads, organism, reference, collection_date -> tuple(meta, reads) },
+        params.length_required
+    )
+
+    //
     // MODULE: Spades
     //
     SPADES (
-        ch_samplesheet
-            .map{ meta, reads, organism, reference, collection_date -> tuple(meta, reads) }
+        FASTP.out.trimmed
+    )
+
+    //
+    // MODULE: Seqtk seq
+    //
+    FILTER_CONTIGS (
+        SPADES.out.assembly,
+        params.min_contig_length
+    )
+
+    //
+    // MODULE: Quast
+    //
+    QUAST (
+        FILTER_CONTIGS.out.filtered_contigs
     )
 
     //
@@ -75,6 +91,15 @@ workflow BACTRAIL_ADD {
         SPADES.out.assembly,
         ch_reference_list.first(),
         ch_reference_dir.first()
+    )
+
+    //
+    // MODULE: Kraken2
+    //
+    KRAKEN2 (
+        ch_samplesheet
+            .map{ meta, reads, organism, reference, collection_date -> tuple(meta, reads)},
+        params.kraken2_db
     )
 
     //

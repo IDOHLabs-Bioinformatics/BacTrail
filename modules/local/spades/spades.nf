@@ -26,7 +26,7 @@ process SPADES {
         -2 ${reads[1]} \\
         -o assembly \\
         -t ${task.cpus} \\
-        --isolate \\
+        --careful \\
         ${args} \\
         > ${prefix}.log
 

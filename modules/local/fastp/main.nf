@@ -9,7 +9,7 @@ process FASTP {
 
     input:
     tuple val(meta), path(reads)
-    path(adapters)
+    val(length_required)
 
     output:
     tuple val(meta), path("*trimmed.fastq.gz"), emit: trimmed
@@ -25,14 +25,13 @@ process FASTP {
     script:
     def args = task.ext.args ?: ''
     def prefix = task.ext.prefix ?: "${meta.id}"
-    def adapt_arg  = adapter_fasta ? "--adapter_fasta ${adapters}" : ''
     """
     fastp \\
         --in1 ${reads[0]} \\
         --in2 ${reads[1]} \\
         --out1 ${prefix}_1_trimmed.fastq.gz \\
         --out2 ${prefix}_2_trimmed.fastq.gz \\
-        ${adapt_arg} \\
+        --length_required ${length_required} \\
         --json ${prefix}.json \\
         --html ${prefix}.html \\
         --thread ${task.cpus} \\
@@ -42,6 +41,7 @@ process FASTP {
     cat << END_VERSIONS > version.yml
     "${task.process}":
         fastp: \$(fastp --version 2>&1 | sed -e "s/fastp //g")
+    END_VERSIONS
     """
 
     stub:
