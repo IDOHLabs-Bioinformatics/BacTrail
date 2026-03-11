@@ -53,54 +53,66 @@
                 },
                 "schema_dir": {
                     "type": "string",
+                    "default": null,
                     "format": "directory-path",
                     "description": "The directory which contains the schemas for PopPUNK. This same path should be used for all runs of BacTrail.",
                     "fa_icon": "fas fa-folder-open"
                 },
                 "db_name": {
                     "type": "string",
+                    "default": null,
                     "format": "file-path",
                     "description": "Path to the database containing intermediate results. Will be created if not present."
                 },
                 "kraken2_db": {
                     "type": "string",
+                    "default": null,
                     "format": "directory-path",
                     "description": "Path to the kraken2 database to use for classification."
                 },
                 "reference_list": {
                     "type": "string",
+                    "default": null,
                     "format": "file-path",
                     "description": "Path to the file of reference paths for fastANI."
                 },
                 "reference_dir": {
                     "type": "string",
                     "format": "directory-path",
+                    "default": null,
                     "description": "Path to the directory containing all of the the references in the reference_list for fastANI."
                 },
                 "organism": {
                     "type": "string",
+                    "default": null,
                     "description": "The organism of the samples to perform the analyze of."
                 },
                 "remove_recombinants": {
                     "type": "boolean",
-                    "description": "Set to true if gubbins should be run to remove recombinants"
+                    "default": false,
+                    "description": "Set to true if gubbins should be run to remove recombinants",
+                    "pattern": "true|false|True|False"
                 },
                 "replace": {
                     "type": "boolean",
+                    "default": false,
                     "description": "Set to True to overwrite samples if already present in the database.",
                     "pattern": "true|false|True|False"
                 },
                 "cluster": {
                     "type": "string",
+                    "default": "all",
                     "description": "The ID of the cluster to analyze. If not provided all isolates from the provided organism will be analyzed"
                 },
                 "collection_date_start": {
                     "type": "string",
                     "pattern": "[0-9][0-9]-[0-9][0-9]-[0-9][0-9][0-9][0-9]",
+                    "default": "01-01-0001",
                     "errorMessage": "The collection_date_start field should be in DD-MM-YYYY format, and before collection_date_end."
                 },
                 "collection_date_end": {
                     "type": "string",
+                    "default": "12-31-9999",
                     "pattern": "[0-9][0-9]-[0-9][0-9]-[0-9][0-9][0-9][0-9]",
                     "errorMessage": "The collection_date field should be in DD-MM-YYYY format, and after collection_date_start."
                 }
