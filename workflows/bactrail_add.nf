@@ -32,13 +32,15 @@ include { WRITE_STATUS           } from '../modules/local/database/write_status.
 workflow BACTRAIL_ADD {
 
     take:
-    ch_samplesheet    // channel: samplesheet read in from --input
-    ch_reference_list // channel: file of list of references for fastANI
-    ch_reference_dir  // channel: directory of the references that fastANI points to
+    ch_samplesheet     // channel: samplesheet read in from --input
+    ch_reference_list  // channel: file of list of references for fastANI
+    ch_reference_dir   // channel: directory of references for fastANI
+    ch_schema_dir      // channel: directory of the popPUNK schemas
+    ch_kraken2_db      // channel: kraken2 database
+    ch_db              // channel: output database
+    ch_versions        // channel: versions
 
     main:
-
-    ch_versions = Channel.empty()
     ch_multiqc_files = Channel.empty()
 
     ch_samplesheet
@@ -50,7 +52,7 @@ workflow BACTRAIL_ADD {
     // MODULE: Database verify
     //
     DATABASE_VERIFY (
-        params.schema_dir,
+        ch_schema_dir,
         organisms
     )
 
@@ -88,7 +90,7 @@ workflow BACTRAIL_ADD {
     // MODULE: fastANI
     //
     FASTANI (
-        SPADES.out.assembly,
+        FILTER_CONTIGS.out.filtered_contigs,
         ch_reference_list.first(),
         ch_reference_dir.first()
     )
@@ -99,14 +101,14 @@ workflow BACTRAIL_ADD {
     KRAKEN2 (
         ch_samplesheet
             .map{ meta, reads, organism, reference, collection_date -> tuple(meta, reads)},
-        params.kraken2_db
+        ch_kraken2_db
     )
 
     //
     // MODULE: Make popPUNK query file
     //
     POPPUNK_QUERY (
-        SPADES.out.assembly
+        FILTER_CONTIGS.out.filtered_contigs
         .combine(ch_samplesheet, by:0)
         .groupTuple(by:3)
         .map { meta, assembly, reads, organism, reference, collection_date -> tuple(organism, assembly)}
@@ -118,31 +120,41 @@ workflow BACTRAIL_ADD {
     POPPUNK_ASSIGN (
         DATABASE_VERIFY.out.organism_schema
         .combine(POPPUNK_QUERY.out.query, by:0)
-        .combine(SPADES.out.assembly
+        .combine(FILTER_CONTIGS.out.filtered_contigs
                 .combine(ch_samplesheet, by:0)
                 .groupTuple(by:3)
                 .map { meta, assembly, reads, organism, reference, collection_date -> tuple(organism, assembly)}
                 , by:0),
-        params.schema_dir
+        ch_schema_dir
     )
 
     //
     // MODULE: Prokka
     //
     PROKKA (
-        SPADES.out.assembly
+        FILTER_CONTIGS.out.filtered_contigs
     )
 
     //
     // MODULE: Snippy
     //
     SNIPPY (
-        ch_samplesheet
-            .map{ meta, reads, organism, reference, collection_date -> tuple(meta, reads, reference) }
+        FASTP.out.trimmed
+            .join(ch_samplesheet
+                .map { meta, reads, organism, reference, collection_date -> tuple(meta, reference) })
     )
 
+    FILTER_CONTIGS.out.filtered_contigs
+        .join(PROKKA.out.gff)
+        .join(SNIPPY.out.results)
+        .join(ch_samplesheet
+                .map { meta, reads, organism, reference, collection_date -> tuple(meta, organism, collection_date) }
+        )
+        .map { meta, assembly, gff, snippy, organism, collection_date -> tuple(organism, meta, assembly, gff, snippy, collection_date) }
+        .combine(POPPUNK_ASSIGN.out.clusters, by: 0).view()
+
     UPDATE_DB (
-        SPADES.out.assembly
+        FILTER_CONTIGS.out.filtered_contigs
         .join(PROKKA.out.gff)
         .join(SNIPPY.out.results)
         .join(ch_samplesheet
@@ -150,11 +162,9 @@ workflow BACTRAIL_ADD {
         )
         .map { meta, assembly, gff, snippy, organism, collection_date -> tuple(organism, meta, assembly, gff, snippy, collection_date) }
         .combine(POPPUNK_ASSIGN.out.clusters, by: 0),
-        params.db_name,
+        ch_db.first(),
         params.replace.toString().capitalize()
     )
-
-    // UPDATE_DB.out.status.collect().view()
 
     WRITE_STATUS(
         UPDATE_DB.out.status.collect()

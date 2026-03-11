@@ -49,9 +49,13 @@ params.fasta = getGenomeAttribute('fasta')
 workflow NFCORE_BACTRAIL_ADD {
 
     take:
-    samplesheet    // channel: samplesheet read in from --input
-    reference_list // channel: file of list of references for fastANI
-    reference_dir  // channel: directory of references for fastANI
+    samplesheet     // channel: samplesheet read in from --input
+    reference_list  // channel: file of list of references for fastANI
+    reference_dir   // channel: directory of references for fastANI
+    schema_dir      // channel: directory of the popPUNK schemas
+    kraken2_db      // channel: kraken2 database
+    db              // channel: output database
+    versions        // channel: versions
 
     main:
 
@@ -61,7 +65,11 @@ workflow NFCORE_BACTRAIL_ADD {
     BACTRAIL_ADD (
         samplesheet,
         reference_list,
-        reference_dir
+        reference_dir,
+        schema_dir,
+        kraken2_db,
+        db,
+        versions
     )
 
     emit:
@@ -130,7 +138,11 @@ workflow ADD {
     NFCORE_BACTRAIL_ADD (
         PIPELINE_INITIALISATION.out.samplesheet,
         PIPELINE_INITIALISATION.out.reference_list,
-        PIPELINE_INITIALISATION.out.reference_dir
+        PIPELINE_INITIALISATION.out.reference_dir,
+        PIPELINE_INITIALISATION.out.schema_dir,
+        PIPELINE_INITIALISATION.out.kraken2_db,
+        PIPELINE_INITIALISATION.out.db,
+        PIPELINE_INITIALISATION.out.versions
     )
 
     PIPELINE_COMPLETION_ADD (

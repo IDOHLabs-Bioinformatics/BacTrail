@@ -57,90 +57,6 @@ workflow PIPELINE_INITIALISATION {
     ch_versions = Channel.empty()
 
     //
-    // Check the mode specific parameters
-    //
-
-    if (mode == 'add') {
-        if (!new File(input).exists()) {
-            println("ERROR: The input samplesheet ${input} does not exist.")
-            System.exit(1)
-        }
-        if (!new File(schema_dir).exists() || !new File(schema_dir).isDirectory()) {
-            println("ERROR: The input schema directory ${schema_dir} either does not exist or is not a directory.")
-            System.exit(1)
-        }
-        if (!new File(kraken2_db).exists() || !new File(kraken2_db).isDirectory()) {
-            println("ERROR: The input schema directory ${kraken2_db} either does not exist or is not a directory.")
-            System.exit(1)
-        }
-
-        reference_list = reference_list ?: "${projectDir}/assets/fastANI_reference_list.txt"
-        Channel.fromPath(reference_list, checkIfExists: true)
-            .set { ch_reference_list }
-
-        reference_dir = reference_dir ?: "${projectDir}/assets/references"
-        Channel.fromPath(reference_dir, checkIfExists: true)
-            .set { ch_reference_dir }
-
-
-        assert replace instanceof Boolean
-
-        //
-        // Create channel from input file provided through params.input
-        //
-        Channel
-            .fromSamplesheet("input")
-            .map {
-                meta, fastq_1, fastq_2, organism, reference, collection_date ->
-                    if (!fastq_2) {
-                        return [ meta.id, meta + [ single_end:true ], [ fastq_1 ], organism, reference, collection_date ]
-                    } else {
-                        return [ meta.id, meta + [ single_end:false ], [ fastq_1, fastq_2 ], organism, reference, collection_date ]
-                    }
-            }
-            .groupTuple()
-            .map {
-                validateInputSamplesheet(it)
-            }
-            .map {
-                meta, fastqs, reference, organism, collection_date ->
-                    return [ meta, fastqs.flatten(), organism, reference, collection_date ]
-            }
-            .set { ch_samplesheet }
-
-    }
-    else if (mode == 'analyze') {
-        // prepare dates to check
-        def formatter = DateTimeFormatter.ofPattern("MM-dd-yyyy")
-        def date1 = LocalDate.parse(collection_date_start, formatter)
-        def date2 = LocalDate.parse(collection_date_end, formatter)
-
-        if (!new File(db_name).exists()) {
-            println("ERROR: The input isolate database ${db_name} does not exist.")
-            System.exit(1)
-        }
-        if (organism == 'empty') {
-            println("ERROR: Provide an organism to analyze.")
-            System.exit(1)
-        }
-        if (!date1.isBefore(date2)) {
-            println("ERROR: Collection date start is after collection date end.")
-            System.exit(1)
-        }
-
-
-        ch_samplesheet    = Channel.empty()
-        ch_reference_list = Channel.empty()
-        ch_reference_dir  = Channel.empty()
-
-        assert remove_recombinants instanceof Boolean
-    }
-    else {
-        println("ERROR: ${mode} is not one of the acceptable 'ADD' OR 'ANALYZE'.")
-        System.exit(1)
-    }
-
-    //
     // Print version and exit if required and dump pipeline parameters to JSON file
     //
     UTILS_NEXTFLOW_PIPELINE (
@@ -176,10 +92,94 @@ workflow PIPELINE_INITIALISATION {
     //
     validateInputParameters()
 
+
+    //
+    // Check the mode specific parameters
+    //
+    if (mode == 'add') {
+        reference_list = reference_list ?: "${projectDir}/assets/fastANI_reference_list.txt"
+        Channel.fromPath(reference_list, checkIfExists: true)
+            .set { ch_reference_list }
+
+        reference_dir = reference_dir ?: "${projectDir}/assets/references"
+        Channel.fromPath(reference_dir, checkIfExists: true)
+            .set { ch_reference_dir }
+
+        Channel.fromPath(schema_dir, checkIfExists: true)
+            .set { ch_schema_dir }
+
+        Channel.fromPath(kraken2_db, checkIfExists: true)
+            .set { ch_kraken2_db }
+
+        Channel.fromPath(db_name)  // DB can be created if needed, preferred this way
+            .set { ch_db_name }
+
+        assert replace instanceof Boolean
+
+        //
+        // Create channel from input file provided through params.input
+        //
+        Channel
+            .fromSamplesheet("input")
+            .map {
+                meta, fastq_1, fastq_2, organism, reference, collection_date ->
+                    if (!fastq_2) {
+                        return [ meta.id, meta + [ single_end:true ], [ fastq_1 ], organism, reference, collection_date ]
+                    } else {
+                        return [ meta.id, meta + [ single_end:false ], [ fastq_1, fastq_2 ], organism, reference, collection_date ]
+                    }
+            }
+            .groupTuple()
+            .map {
+                validateInputSamplesheet(it)
+            }
+            .map {
+                meta, fastqs, reference, organism, collection_date ->
+                    return [ meta, fastqs.flatten(), organism, reference, collection_date ]
+            }
+            .set { ch_samplesheet }
+    }
+
+    else if (mode == 'analyze') {
+        // prepare dates to check
+        def formatter = DateTimeFormatter.ofPattern("MM-dd-yyyy")
+        def date1 = LocalDate.parse(collection_date_start, formatter)
+        def date2 = LocalDate.parse(collection_date_end, formatter)
+
+        if (organism == 'empty') {
+            println("ERROR: Provide an organism to analyze.")
+            System.exit(1)
+        }
+        if (!date1.isBefore(date2)) {
+            println("ERROR: Collection date start is after collection date end.")
+            System.exit(1)
+        }
+
+        Channel.fromPath(db_name, checkIfExists: true)  // DB must exist for analysis to take place
+            .set { ch_db_name}
+
+        assert remove_recombinants instanceof Boolean
+
+        // declare empty channels for the unused channels from ADD emit
+        ch_samplesheet    = Channel.empty()
+        ch_reference_list = Channel.empty()
+        ch_reference_dir  = Channel.empty()
+        ch_schema_dir     = Channel.empty()
+        ch_kraken2_db     = Channel.empty()
+    }
+
+    else {
+        println("ERROR: ${mode} is not one of the acceptable 'ADD' OR 'ANALYZE'.")
+        System.exit(1)
+    }
+
     emit:
     samplesheet    = ch_samplesheet
     reference_list = ch_reference_list
     reference_dir  = ch_reference_dir
+    schema_dir     = ch_schema_dir
+    kraken2_db     = ch_kraken2_db
+    db             = ch_db_name
     versions       = ch_versions
 }
 
