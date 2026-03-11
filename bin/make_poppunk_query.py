@@ -20,5 +20,5 @@ if __name__ == '__main__':
 
     with open(handle, 'w') as out:
         for assembly in assemblies.split(' '):
-            name = assembly.replace('_assembly.fasta', '')
+            name = assembly.replace('_filtered_contigs.fasta', '')
             out.write(f'{name}\t{assembly}\n')

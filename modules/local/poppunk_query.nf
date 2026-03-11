@@ -13,7 +13,7 @@ process POPPUNK_QUERY {
 
     script:
     """
-    make_poppunk_query.py -a '${assemblies}' -o ${organism[0]}
+    make_poppunk_query.py -a "${assemblies}" -o ${organism[0]}
 
     cat << END_VERSIONS > version.yml
     "${task.process}":
