@@ -17,6 +17,7 @@ include { SNIPPY                 } from '../modules/local/snippy/snippy.nf'
 include { SPADES                 } from '../modules/local/spades/spades.nf'
 include { FILTER_CONTIGS         } from '../modules/local/seqtk/main.nf'
 include { QUAST                  } from '../modules/local/quast/main.nf'
+include { BUSCO                  } from '../modules/local/busco/main.nf'
 include { FASTANI                } from '../modules/local/fastANI/fastANI.nf'
 include { POPPUNK_QUERY          } from '../modules/local/poppunk_query.nf'
 include { PROKKA                 } from '../modules/local/prokka/prokka.nf'
@@ -65,6 +66,14 @@ workflow BACTRAIL_ADD {
     )
 
     //
+    // MODULE: Kraken2
+    //
+    KRAKEN2 (
+        FASTP.out.trimmed,
+        ch_kraken2_db
+    )
+
+    //
     // MODULE: Spades
     //
     SPADES (
@@ -87,21 +96,19 @@ workflow BACTRAIL_ADD {
     )
 
     //
+    // MODULE: BUSCO
+    //
+    BUSCO (
+        FILTER_CONTIGS.out.filtered_contigs
+    )
+
+    //
     // MODULE: fastANI
     //
     FASTANI (
         FILTER_CONTIGS.out.filtered_contigs,
         ch_reference_list.first(),
         ch_reference_dir.first()
-    )
-
-    //
-    // MODULE: Kraken2
-    //
-    KRAKEN2 (
-        ch_samplesheet
-            .map{ meta, reads, organism, reference, collection_date -> tuple(meta, reads)},
-        ch_kraken2_db
     )
 
     //
@@ -143,15 +150,6 @@ workflow BACTRAIL_ADD {
             .join(ch_samplesheet
                 .map { meta, reads, organism, reference, collection_date -> tuple(meta, reference) })
     )
-
-    FILTER_CONTIGS.out.filtered_contigs
-        .join(PROKKA.out.gff)
-        .join(SNIPPY.out.results)
-        .join(ch_samplesheet
-                .map { meta, reads, organism, reference, collection_date -> tuple(meta, organism, collection_date) }
-        )
-        .map { meta, assembly, gff, snippy, organism, collection_date -> tuple(organism, meta, assembly, gff, snippy, collection_date) }
-        .combine(POPPUNK_ASSIGN.out.clusters, by: 0).view()
 
     UPDATE_DB (
         FILTER_CONTIGS.out.filtered_contigs
