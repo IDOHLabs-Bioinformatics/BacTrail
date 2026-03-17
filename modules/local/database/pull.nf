@@ -6,6 +6,7 @@ process PULL {
 
     input:
     val(organism)
+    val(sample_list)
     val(database)
     val(cluster)
     val(collection_date_start)
@@ -21,7 +22,13 @@ process PULL {
 
     script:
     """
-    db_pull.py -o ${organism} -d ${database} -c ${cluster} -s ${collection_date_start} -e ${collection_date_end}
+    db_pull.py \\
+        --database ${database} \\
+        --organism ${organism} \\
+        --sample_list ${sample_list} \\
+        --cluster ${cluster} \\
+        --collection_date_start ${collection_date_start} \\
+        --collection_date_end ${collection_date_end}
 
     cat << END_VERSIONS > version.yml
     "${task.process}":

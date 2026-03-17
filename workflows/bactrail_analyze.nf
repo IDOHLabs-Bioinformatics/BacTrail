@@ -38,7 +38,8 @@ workflow BACTRAIL_ANALYZE {
     ch_multiqc_files = Channel.empty()
 
     PULL (
-        organism,
+        params.organism,
+        params.sample_list,
         db_name,
         cluster,
         collection_date_start,
