@@ -11,8 +11,9 @@ process FASTANI {
 
     output:
     tuple val(meta), path("${meta.id}_fastANI.txt"), emit: ani
+    tuple val(meta), env(ref),                       emit: best_hit_ref
     tuple val(meta), path("${meta.id}_fastANI.log"), emit: log
-    path("version.yml"),                            emit: version
+    path("version.yml"),                             emit: version
 
     when:
     task.ext.when == null || task.ext.when
@@ -28,6 +29,8 @@ process FASTANI {
         -t ${task.cpus} \\
         ${args} \\
         2> ${prefix}_fastANI.log
+
+    ref=\$(head -n 1 ${prefix}_fastANI.txt | cut -f 2)
 
     cat << END_VERSIONS > version.yml
     "${task.process}":

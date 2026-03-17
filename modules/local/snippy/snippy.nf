@@ -8,8 +8,9 @@ process SNIPPY {
     tuple val(meta), path(reads), path(ref)
 
     output:
-    tuple val(meta), path("${meta.id}_snippy"), emit: results
-    path("version.yml"),                        emit: version
+    tuple val(meta), path("${meta.id}_snippy"),       emit: results
+    tuple val(meta), path("${meta.id}_snippy/*.txt"), emit: summary
+    path("version.yml"),                              emit: version
 
     when:
     task.ext.when == null || task.ext.when
@@ -21,6 +22,7 @@ process SNIPPY {
     snippy \\
     --cpus ${task.cpus} \\
     --outdir ${prefix}_snippy \\
+    --prefix ${prefix} \\
     --ref ${ref} \\
     --R1 ${reads[0]} \\
     --R2 ${reads[1]} \\
