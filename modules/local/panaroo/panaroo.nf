@@ -9,7 +9,7 @@ process PANAROO {
 
     output:
     path("core_genome/core_gene_alignment.aln"), emit: core
-    path("version.yml"),   emit: version
+    path("version.yml"),                         emit: version
 
     when:
     task.ext.when == null || task.ext.when

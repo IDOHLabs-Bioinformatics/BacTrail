@@ -88,6 +88,7 @@ workflow NFCORE_BACTRAIL_ANALYZE {
     cluster                // channel: the cluster to analyze if provided
     collection_date_start  // channel: the start date of the range to analyze
     collection_date_end    // channel: the end date of the range to analyze
+    versions               // channel: versions
 
     main:
 
@@ -99,7 +100,8 @@ workflow NFCORE_BACTRAIL_ANALYZE {
         db_name,
         cluster,
         collection_date_start,
-        collection_date_end
+        collection_date_end,
+        versions
     )
 
 }
@@ -185,10 +187,11 @@ workflow ANALYZE {
 
     NFCORE_BACTRAIL_ANALYZE (
         params.organism,
-        params.db_name,
+        PIPELINE_INITIALISATION.out.db,
         params.cluster,
         params.collection_date_start,
-        params.collection_date_end
+        params.collection_date_end,
+        PIPELINE_INITIALISATION.out.versions
     )
 
     PIPELINE_COMPLETION_ANALYZE (

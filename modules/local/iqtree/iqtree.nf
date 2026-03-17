@@ -8,11 +8,12 @@ process IQTREE {
     path(aln)
 
     output:
-    path("*.iqtree"),   emit: 'iqtree'
-    path("*.treefile"), emit: 'treefile'
-    path("*.bionj"),    emit: 'bionj'
-    path("*.mldist"),   emit: 'mldist'
-    path("*.log"),      emit: 'log'
+    path("*.iqtree"),    emit: iqtree
+    path("*.treefile"),  emit: treefile
+    path("*.bionj"),     emit: bionj
+    path("*.mldist"),    emit: mldist
+    path("*.log"),       emit: log
+    path("version.yml"), emit: version
 
     when:
     task.ext.when == null || task.ext.when

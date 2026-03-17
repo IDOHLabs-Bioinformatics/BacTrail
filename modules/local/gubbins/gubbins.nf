@@ -9,6 +9,7 @@ process GUBBINS {
 
     output:
     path("gubbins.filtered_polymorphic_sites.fasta"), emit: gubbins_filtered
+    path("version.yml"),                              emit: version
 
     when:
     task.ext.when == null || task.ext.when

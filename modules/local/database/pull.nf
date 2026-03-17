@@ -25,7 +25,7 @@ process PULL {
 
     cat << END_VERSIONS > version.yml
     "${task.process}":
-        sqlite3: \$(echo 'import sqlite3;print(sqlite3.version);' | python)
+        sqlite3: \$(echo 'import sqlite3;print(sqlite3.version);' | python3)
     END_VERSIONS
     """
 
@@ -39,7 +39,7 @@ process PULL {
 
     cat << END_VERSIONS > version.yml
     "${task.process}":
-        sqlite3: \$(echo 'import sqlite3;print(sqlite3.version);' | python)
+        sqlite3: \$(echo 'import sqlite3;print(sqlite3.version);' | python3)
     END_VERSIONS
     """
 }

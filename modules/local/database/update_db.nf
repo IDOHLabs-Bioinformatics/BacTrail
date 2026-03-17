@@ -26,8 +26,8 @@ process UPDATE_DB {
           -o ${organism[0]} \\
           -a ${assembly} \\
           -g ${gff} \\
-          -f ${snippy}/snps.aligned.fa \\
-          -v ${snippy}/snps.vcf \\
+          -f ${snippy}/${meta.id}.aligned.fa \\
+          -v ${snippy}/${meta.id}.vcf \\
           -r ${snippy}/reference/ref.fa \\
           -c ${clusters} \\
           -s ${collection_date[0]})
@@ -38,8 +38,8 @@ process UPDATE_DB {
           -o ${organism[0]} \\
           -a ${assembly} \\
           -g ${gff} \\
-          -f ${snippy}/snps.aligned.fa \\
-          -v ${snippy}/snps.vcf \\
+          -f ${snippy}/${meta.id}.aligned.fa \\
+          -v ${snippy}/${meta.id}.vcf \\
           -r ${snippy}/reference/ref.fa \\
           -c ${clusters} \\
           -s ${collection_date[0]} \\
