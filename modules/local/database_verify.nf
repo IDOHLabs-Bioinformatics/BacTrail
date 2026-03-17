@@ -21,7 +21,7 @@ process DATABASE_VERIFY {
     ln -s ${schema_dir}/\$schema_path \$schema_path
     cat << END_VERSIONS > version.yml
     "${task.process}":
-        python: \$(python --version | cut -d ' ' -f 2)
+        python: \$(python3 --version | cut -d ' ' -f 2)
     END_VERSIONS
     """
 
@@ -31,7 +31,7 @@ process DATABASE_VERIFY {
 
     cat << END_VERSIONS > version.yml
     "${task.process}":
-        python: \$(python --version | cut -d ' ' -f 2)
+        python: \$(python3 --version | cut -d ' ' -f 2)
     END_VERSIONS
     """
 }

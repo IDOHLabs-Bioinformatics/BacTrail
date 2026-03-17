@@ -12,8 +12,8 @@ process FASTP {
     tuple val(meta), path("*trimmed.fastq.gz"), emit: trimmed
     tuple val(meta), path("*.json"),            emit: json
     tuple val(meta), path("*.html"),            emit: html
-    tuple val(meta), path("version.yml"),       emit: version
     tuple val(meta), path("*.log"),             emit: log
+    path("version.yml"),                        emit: version
 
 
     when:

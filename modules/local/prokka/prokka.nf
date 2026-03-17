@@ -19,7 +19,7 @@ process PROKKA {
     tuple val(meta), path("*.tsv"), emit: tsv
     tuple val(meta), path("*.txt"), emit: txt
     tuple val(meta), path("*.log"), emit: log
-    path("version.yml")
+    path("version.yml"),            emit: version
 
     when:
     task.ext.when == null || task.ext.when

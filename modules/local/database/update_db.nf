@@ -48,7 +48,7 @@ process UPDATE_DB {
 
     cat << END_VERSIONS > version.yml
     "${task.process}":
-        sqlite3: \$(echo 'import sqlite3;print(sqlite3.version);' | python)
+        sqlite3: \$(echo 'import sqlite3;print(sqlite3.version);' | python3)
     END_VERSIONS
     """
 
@@ -56,7 +56,7 @@ process UPDATE_DB {
     """
     cat << END_VERSIONS > version.yml
     "${task.process}":
-        sqlite3: \$(echo 'import sqlite3;print(sqlite3.version);' | python)
+        sqlite3: \$(echo 'import sqlite3;print(sqlite3.version);' | python3)
     END_VERSIONS
     """
 }

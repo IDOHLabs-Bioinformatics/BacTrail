@@ -12,7 +12,7 @@ process FASTANI {
     output:
     tuple val(meta), path("${meta.id}_fastANI.txt"), emit: ani
     tuple val(meta), path("${meta.id}_fastANI.log"), emit: log
-    path("versions.yml"),                            emit: versions
+    path("version.yml"),                            emit: version
 
     when:
     task.ext.when == null || task.ext.when
@@ -29,7 +29,7 @@ process FASTANI {
         ${args} \\
         2> ${prefix}_fastANI.log
 
-    cat << END_VERSIONS > versions.yml
+    cat << END_VERSIONS > version.yml
     "${task.process}":
         fastANI: \$(fastANI -v 2>&1 | head -n 1 | cut -d ' ' -f 2)
     END_VERSIONS
@@ -41,7 +41,7 @@ process FASTANI {
     touch ${prefix}_fastANI.txt
     touch ${prefix}_fastANI.log
 
-    cat << END_VERSIONS > versions.yml
+    cat << END_VERSIONS > version.yml
     "${task.process}":
         fastANI: \$(fastANI -v 2>&1 | head -n 1 | cut -d ' ' -f 2)
     END_VERSIONS

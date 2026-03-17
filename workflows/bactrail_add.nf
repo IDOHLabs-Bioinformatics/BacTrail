@@ -168,6 +168,13 @@ workflow BACTRAIL_ADD {
         UPDATE_DB.out.status.collect()
     )
 
+    ch_versions = ch_versions.mix(DATABASE_VERIFY.out.version, FASTP.out.version, KRAKEN2.out.version, SPADES.out.version,
+        FILTER_CONTIGS.out.version, QUAST.out.version, BUSCO.out.version, FASTANI.out.version, POPPUNK_QUERY.out.version,
+        POPPUNK_ASSIGN.out.version, PROKKA.out.version, SNIPPY.out.version, UPDATE_DB.out.version)
+
+    ch_multiqc_files = ch_multiqc_files.mix(KRAKEN2.out.report.collect{it[1]}, FASTP.out.json.collect{it[1]},
+        QUAST.out.report_tsv.collect{it[1]}, BUSCO.out.busco.collect{it[1]})
+
     //
     // Collate and save software versions
     //

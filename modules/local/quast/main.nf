@@ -11,6 +11,7 @@ process QUAST {
     tuple val(meta), path("${meta.id}_quast/report.tsv"),  emit: report_tsv
     tuple val(meta), path("${meta.id}_quast/report.html"), emit: report_html
     tuple val(meta), path("${meta.id}_quast/report.pdf"),  emit: report_pdf
+    path("version.yml"),                                   emit: version
 
 
     script:
