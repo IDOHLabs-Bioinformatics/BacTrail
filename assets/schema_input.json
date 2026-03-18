@@ -27,24 +27,12 @@
                 "pattern": "^\\S+\\.f(ast)?q\\.gz$",
                 "errorMessage": "FastQ file for reads 2 cannot contain spaces and must have extension '.fq.gz' or '.fastq.gz'"
             },
-            "organism": {
-                "type": "string",
-                "pattern": "^\\S+$",
-                "errorMessage": "The unabbreviated organism name must be provided with '_' replacing any spaces."
-            },
-            "reference": {
-                "type": "string",
-                "format": "file-path",
-                "exists": true,
-                "pattern": "^\\S+.fasta$",
-                "errorMessage": "The reference genome should the absolute path the the fasta file."
-            },
             "collection_date": {
                 "type": "string",
                 "pattern": "(0[1-9]|1[0,1,2])-(0[1-9]|[12][0-9]|3[01])-\\d{4}",
                 "errorMessage": "The collection_date field should be in MM-DD-YYYY format."
             }
         },
-        "required": ["sample", "fastq_1", "organism", "reference", "collection_date"]
+        "required": ["sample", "fastq_1", "collection_date"]
     }
 }

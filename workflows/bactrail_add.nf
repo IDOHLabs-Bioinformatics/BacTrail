@@ -44,24 +44,11 @@ workflow BACTRAIL_ADD {
     main:
     ch_multiqc_files = Channel.empty()
 
-    ch_samplesheet
-        .map { meta, reads, organism, reference, collection_date -> organism }
-        .unique()
-        .set{ organisms }
-
-    //
-    // MODULE: Database verify
-    //
-    DATABASE_VERIFY (
-        ch_schema_dir,
-        organisms
-    )
-
     //
     // MODULE: fastp
     FASTP (
         ch_samplesheet
-            .map{ meta, reads, organism, reference, collection_date -> tuple(meta, reads) },
+            .map{ meta, reads, collection_date -> tuple(meta, reads) },
         params.length_required
     )
 
@@ -70,7 +57,7 @@ workflow BACTRAIL_ADD {
     //
     KRAKEN2 (
         FASTP.out.trimmed,
-        ch_kraken2_db
+        ch_kraken2_db.first()
     )
 
     //
@@ -111,28 +98,50 @@ workflow BACTRAIL_ADD {
         ch_reference_dir.first()
     )
 
+    // select unique organisms
+    unique_organisms = FASTANI.out.organism
+        .map { meta, organism -> organism }
+        .collect()
+        .flatten()
+        .unique()
+
+    //
+    // MODULE: Database verify
+    //
+    DATABASE_VERIFY (
+        ch_schema_dir.first(),
+        unique_organisms
+    )
+
     //
     // MODULE: Make popPUNK query file
     //
     POPPUNK_QUERY (
         FILTER_CONTIGS.out.filtered_contigs
-        .combine(ch_samplesheet, by:0)
-        .groupTuple(by:3)
-        .map { meta, assembly, reads, organism, reference, collection_date -> tuple(organism, assembly)}
+            .join(FASTANI.out.organism)
+            .map { meta, assembly, organism -> tuple(organism, assembly)}
+            .groupTuple()
     )
+
+        DATABASE_VERIFY.out.organism_schema
+            .join(POPPUNK_QUERY.out.query)
+            .join(FILTER_CONTIGS.out.filtered_contigs
+                .join(FASTANI.out.organism)
+                .map { meta, assembly, organism -> tuple(organism, assembly)}
+                .groupTuple())
+            .view()
 
     //
     // MODULE: popPUNK cluster assignment
     //
     POPPUNK_ASSIGN (
         DATABASE_VERIFY.out.organism_schema
-        .combine(POPPUNK_QUERY.out.query, by:0)
-        .combine(FILTER_CONTIGS.out.filtered_contigs
-                .combine(ch_samplesheet, by:0)
-                .groupTuple(by:3)
-                .map { meta, assembly, reads, organism, reference, collection_date -> tuple(organism, assembly)}
-                , by:0),
-        ch_schema_dir
+            .join(POPPUNK_QUERY.out.query)
+            .join(FILTER_CONTIGS.out.filtered_contigs
+                .join(FASTANI.out.organism)
+                .map { meta, assembly, organism -> tuple(organism, assembly)}
+                .groupTuple()),
+        ch_schema_dir.first()
     )
 
     //
@@ -155,9 +164,10 @@ workflow BACTRAIL_ADD {
         .join(PROKKA.out.gff)
         .join(SNIPPY.out.results)
         .join(ch_samplesheet
-                .map { meta, reads, organism, reference, collection_date -> tuple(meta, organism, collection_date) }
+                .map { meta, reads, collection_date -> tuple(meta, collection_date) }
         )
-        .map { meta, assembly, gff, snippy, organism, collection_date -> tuple(organism, meta, assembly, gff, snippy, collection_date) }
+        .join(FASTANI.out.organism)
+        .map { meta, assembly, gff, snippy, collection_date, organism -> tuple(organism, meta, assembly, gff, snippy, collection_date) }
         .combine(POPPUNK_ASSIGN.out.clusters, by: 0),
         ch_db.first(),
         params.replace.toString().capitalize()

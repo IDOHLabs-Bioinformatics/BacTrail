@@ -122,11 +122,11 @@ workflow PIPELINE_INITIALISATION {
         Channel
             .fromSamplesheet("input")
             .map {
-                meta, fastq_1, fastq_2, organism, reference, collection_date ->
+                meta, fastq_1, fastq_2, collection_date ->
                     if (!fastq_2) {
-                        return [ meta.id, meta + [ single_end:true ], [ fastq_1 ], organism, reference, collection_date ]
+                        return [ meta.id, meta + [ single_end:true ], [ fastq_1 ], collection_date ]
                     } else {
-                        return [ meta.id, meta + [ single_end:false ], [ fastq_1, fastq_2 ], organism, reference, collection_date ]
+                        return [ meta.id, meta + [ single_end:false ], [ fastq_1, fastq_2 ], collection_date ]
                     }
             }
             .groupTuple()
@@ -134,8 +134,8 @@ workflow PIPELINE_INITIALISATION {
                 validateInputSamplesheet(it)
             }
             .map {
-                meta, fastqs, reference, organism, collection_date ->
-                    return [ meta, fastqs.flatten(), organism, reference, collection_date ]
+                meta, fastqs, collection_date ->
+                    return [ meta, fastqs.flatten(), collection_date ]
             }
             .set { ch_samplesheet }
     }
@@ -274,7 +274,7 @@ def validateInputParameters() {
 // Validate channels from input samplesheet
 //
 def validateInputSamplesheet(input) {
-    def (metas, fastqs, reference, organism, collection_date) = input[1..5]
+    def (metas, fastqs, collection_date) = input[1..3]
 
     // Check that multiple runs of the same sample are of the same datatype i.e. single-end / paired-end
     def endedness_ok = metas.collect{ it.single_end }.unique().size == 1
@@ -282,7 +282,7 @@ def validateInputSamplesheet(input) {
         error("Please check input samplesheet -> Multiple runs of a sample must be of the same datatype i.e. single-end or paired-end: ${metas[0].id}")
     }
 
-    return [ metas[0], fastqs, organism, reference, collection_date ]
+    return [ metas[0], fastqs, collection_date ]
 }
 //
 // Get attribute from genome config file e.g. fasta

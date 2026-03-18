@@ -1,6 +1,6 @@
 process POPPUNK_ASSIGN {
     label 'process_medium'
-    tag "${organism[0]}"
+    tag "${organism}"
 
     container "staphb/poppunk:2.7.5"
 
@@ -34,7 +34,7 @@ process POPPUNK_ASSIGN {
           ${args}
     fi
 
-    mv poppunk_clusters/poppunk_clusters_clusters.csv ${organism[0]}_poppunk_clusters.csv
+    mv poppunk_clusters/poppunk_clusters_clusters.csv ${organism}_poppunk_clusters.csv
 
     cat << END_VERSIONS > version.yml
     "${task.process}":

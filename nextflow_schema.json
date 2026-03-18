@@ -84,7 +84,7 @@
                 },
                 "organism": {
                     "type": "string",
-                    "default": null,
+                    "default": "any",
                     "description": "The organism of the samples to perform the analyze of."
                 },
                 "remove_recombinants": {
@@ -118,7 +118,7 @@
                 },
                 "sample_list": {
                     "type": "string",
-                    "default": null,
+                    "default": "any",
                     "pattern": "^[^,\\s]+(,[^,\\s]+)*$",
                     "description": "A comma separated list, with no spaces, of the sample IDs to query the database for."
                 }

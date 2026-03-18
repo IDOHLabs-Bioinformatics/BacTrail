@@ -11,8 +11,9 @@ process FASTANI {
 
     output:
     tuple val(meta), path("${meta.id}_fastANI.txt"), emit: ani
-    tuple val(meta), env(ref),                       emit: best_hit_ref
     tuple val(meta), path("${meta.id}_fastANI.log"), emit: log
+    tuple val(meta), env(ref),                       emit: best_hit_ref
+    tuple val(meta), env(organism),                  emit: organism
     path("version.yml"),                             emit: version
 
     when:
@@ -31,6 +32,7 @@ process FASTANI {
         2> ${prefix}_fastANI.log
 
     ref=\$(head -n 1 ${prefix}_fastANI.txt | cut -f 2)
+    organism=\$(printf "%s_%s" "\$(head -n 1 \$ref | awk '{print\$2}')" "\$(head -n 1 \$ref | awk '{print\$3}')")
 
     cat << END_VERSIONS > version.yml
     "${task.process}":

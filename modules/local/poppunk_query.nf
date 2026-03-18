@@ -1,6 +1,6 @@
 process POPPUNK_QUERY {
     label 'process_low'
-    tag "${organism[0]}"
+    tag "${organism}"
 
     container "staphb/pandas:3.0.1"
 
@@ -13,7 +13,7 @@ process POPPUNK_QUERY {
 
     script:
     """
-    make_poppunk_query.py -a "${assemblies}" -o ${organism[0]}
+    make_poppunk_query.py -a "${assemblies}" -o ${organism}
 
     cat << END_VERSIONS > version.yml
     "${task.process}":

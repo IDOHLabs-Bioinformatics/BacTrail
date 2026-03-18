@@ -1,6 +1,6 @@
 process DATABASE_VERIFY {
     label 'process_low'
-    tag "${organism[0]}"
+    tag "${organism}"
 
     container "staphb/pandas:3.0.1"
 
@@ -16,7 +16,7 @@ process DATABASE_VERIFY {
     """
     schema_path=\$(database_verify.py \\
         -s ${schema_dir} \\
-        -o ${organism[0]} \\
+        -o ${organism} \\
         )
     ln -s ${schema_dir}/\$schema_path \$schema_path
     cat << END_VERSIONS > version.yml
