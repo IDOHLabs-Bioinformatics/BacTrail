@@ -19,7 +19,7 @@ process SNIPPY_CLEAN {
     """
     snippy-clean_full_aln \\
         ${args} \\
-        core.full.aln \\
+        ${full_aln} \\
         > clean.full.aln
 
     cat << END_VERSION > version.yml

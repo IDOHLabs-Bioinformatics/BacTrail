@@ -1,13 +1,11 @@
 process SNIPPY_CORE {
     label "process_medium"
-    tag "snippy_core"
+    tag "${cluster}"
 
     container "staphb/snippy:4.6.0"
 
     input:
-    path(fasta)
-    path(align)
-    path(vcf)
+    tuple val(cluster), path(fasta), path(align), path(vcf)
     path(ref)
 
     output:
@@ -34,11 +32,15 @@ process SNIPPY_CORE {
       mv \$handle.vcf \$handle
     done
 
+    ls
+
+    ls -d */
+
     snippy-core \\
         --ref ${ref} \\
+        --prefix ${cluster}_core \\
         ${args} \\
         \$(ls -d */)
-
 
     cat << END_VERSION > version.yml
     "${task.process}":

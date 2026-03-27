@@ -5,6 +5,7 @@
 */
 
 include { PULL                   } from '../modules/local/database/pull'
+include { SAFE_RENAME            } from '../modules/local/safe_rename.nf'
 include { SNIPPY_CORE            } from '../modules/local/snippy/snippy_core'
 include { SNIPPY_CLEAN           } from '../modules/local/snippy/snippy_clean'
 include { SNP_SITES              } from '../modules/local/snippy/snp_sites.nf'
@@ -46,11 +47,73 @@ workflow BACTRAIL_ANALYZE {
         collection_date_end
     )
 
+
+    clustered_fasta = PULL.out.fasta
+        .flatten()
+        .map {file ->
+            def parts = file.baseName.split('_cluster_')
+            def cluster = parts[0]
+            def sample = parts[1]
+            def clean_handle = "${sample}.${file.extension}"
+            tuple([sample, cluster], file, clean_handle)
+            }
+
+    clustered_aln = PULL.out.aln
+        .flatten()
+        .map{file ->
+            def parts = file.name.split('\\.')
+            def cluster_parts = parts[0].split('_cluster_')
+            def cluster = cluster_parts[0]
+            def sample = cluster_parts[1]
+            def clean_handle = "${sample}.${parts[1]}.${parts[2]}"
+            tuple([sample, cluster], file, clean_handle)
+           }
+
+    clustered_vcf = PULL.out.vcf
+        .flatten()
+        .map{file ->
+            def parts = file.baseName.split('_cluster_')
+            def cluster = parts[0]
+            def sample = parts[1]
+            def clean_handle = "${sample}.${file.extension}"
+            tuple([sample, cluster], file, clean_handle)
+           }
+
+    clustered_gff = PULL.out.gff
+        .flatten()
+        .map{file ->
+            def parts = file.baseName.split('_cluster_')
+            def group = parts[0]
+            def sample = parts[1]
+            def clean_handle = "${sample}.${file.extension}"
+            tuple([sample, group], file, clean_handle)
+           }
+
+    to_rename = clustered_fasta
+        .join(clustered_aln)
+        .join(clustered_vcf)
+        .join(clustered_gff)
+
+    SAFE_RENAME (
+        to_rename
+    )
+
+    grouped = SAFE_RENAME.out.cleaned
+        .map{ meta, fasta, aln, vcf, gff -> tuple(meta[1], fasta, aln, vcf, gff) }
+        .groupTuple()
+
+    filtered = grouped
+        .filter { it[1] instanceof List && it[1].size() > 1 }
+
+    snippy_input = filtered
+        .map {cluster, fasta, aln, vcf, gff -> tuple(cluster, fasta, aln, vcf)}
+
+    panaroo_input = filtered
+        .map { cluster, fasta, aln, vcf, gff -> tuple(cluster, gff) }
+
     SNIPPY_CORE (
-        PULL.out.fasta,
-        PULL.out.aln,
-        PULL.out.vcf,
-        PULL.out.reference
+         snippy_input,
+         PULL.out.reference.first()
     )
 
     SNIPPY_CLEAN (
@@ -86,18 +149,18 @@ workflow BACTRAIL_ANALYZE {
         // add condition specific versions
         ch_versions = ch_versions.mix(SNP_SITES.out.version, SNP_DISTS.out.version)
     }
-
+    
     PANAROO (
-        PULL.out.gff.collect()
-    )
+        panaroo_input
+        )
 
     IQTREE (
         PANAROO.out.core
-    )
+        )
 
     // mix all multiqc files
     ch_versions = ch_versions.mix(PULL.out.version, SNIPPY_CORE.out.version, SNIPPY_CLEAN.out.version,
-        PANAROO.out.version, IQTREE.out.version)
+       PANAROO.out.version, IQTREE.out.version)
 
 
     //

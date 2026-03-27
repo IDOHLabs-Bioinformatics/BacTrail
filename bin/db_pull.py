@@ -4,12 +4,17 @@ import argparse
 import sqlite3
 import zlib
 from contextlib import closing
-
 import pandas as pd
 
 
-def build_file(name, contents, ftype):
+def build_ref(name, contents, ftype):
     handle = '{}.{}'.format(name, ftype)
+    with open(handle, 'w') as file:
+        file.write(zlib.decompress(contents).decode('utf-8'))
+
+
+def build_file(name, contents, ftype, cluster):
+    handle = '{}_cluster_{}.{}'.format(cluster, name, ftype)
     with open(handle, 'w') as file:
         file.write(zlib.decompress(contents).decode('utf-8'))
 
@@ -41,7 +46,6 @@ if __name__ == '__main__':
             id_list = args.sample_list.split(',')
             placeholders = ','.join(['?'] * len(id_list))
 
-
             # pull data
             data = pd.read_sql_query(
                 f"SELECT id, assembly, gff, aligned, vcf, cluster, organism, collection_date FROM intermediate WHERE id IN ({placeholders})",
@@ -50,13 +54,13 @@ if __name__ == '__main__':
             organism = data['organism'].values[0]
             reference = cursor.execute("SELECT sequence FROM reference_genomes WHERE organism = ?",
                                        [organism]).fetchall()
-            build_file('reference', reference[0][0], 'fna')
+            build_ref('reference', reference[0][0], 'fna')
 
             for row in data.values.tolist():
-                build_file(row[0], row[1], 'fasta')
-                build_file(row[0], row[2], 'gff')
-                build_file(row[0], row[3], 'aligned.fa')
-                build_file(row[0], row[4], 'vcf')
+                build_file(row[0], row[1], 'fasta', row[5])
+                build_file(row[0], row[2], 'gff', row[5])
+                build_file(row[0], row[3], 'aligned.fa', row[5])
+                build_file(row[0], row[4], 'vcf', row[5])
 
         elif args.organism != 'any':
             # pull data
@@ -89,12 +93,12 @@ if __name__ == '__main__':
                                        [args.organism]).fetchall()
 
             for row in data.values.tolist():
-                build_file(row[0], row[1], 'fasta')
-                build_file(row[0], row[2], 'gff')
-                build_file(row[0], row[3], 'aligned.fa')
-                build_file(row[0], row[4], 'vcf')
+                build_file(row[0], row[1], 'fasta', row[5])
+                build_file(row[0], row[2], 'gff', row[5])
+                build_file(row[0], row[3], 'aligned.fa', row[5])
+                build_file(row[0], row[4], 'vcf', row[5])
 
-            build_file('reference', reference[0][0], 'fna')
+            build_ref('reference', reference[0][0], 'fna')
 
         else:
             message = "There is required to be either an organism or reference list provided to query the database."
