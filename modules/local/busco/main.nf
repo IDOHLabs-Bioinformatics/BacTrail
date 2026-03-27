@@ -8,8 +8,8 @@ process BUSCO {
     tuple val(meta), path(assembly)
 
     output:
-    tuple val(meta), path("busco_out/short_summary*.json"), emit: busco
-    path("version.yml"),                                    emit: version
+    tuple val(meta), path("*_busco_out"), emit: busco
+    path("version.yml"),                  emit: version
 
     when:
     task.ext.when == null || task.ext.when
@@ -18,7 +18,12 @@ process BUSCO {
     def args = task.ext.args ?: ''
     def prefix = task.ext.prefix = "${meta.id}"
     """
-    busco --auto-lineage -m geno -i ${assembly} -o busco_out
+    busco \\
+        --auto-lineage \\
+        -m geno \\
+        -i ${assembly} \\
+        -o ${prefix}_busco_out \\
+        ${args}
 
     cat << END_VERSIONS > version.yml
     "${task.process}":
@@ -27,8 +32,9 @@ process BUSCO {
     """
 
     stub:
+    def prefix = task.ext.prefix = "${meta.id}"
     """
-    touch busco_out/short_summary.json
+    touch ${prefix}_busco_out
 
     cat << END_VERSIONS > version.yml
     "${task.process}":

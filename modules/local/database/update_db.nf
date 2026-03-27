@@ -23,7 +23,7 @@ process UPDATE_DB {
       status=\$(update_db.py \\
           -d ${db_name} \\
           -i ${meta.id} \\
-          -o ${organism[0]} \\
+          -o ${organism} \\
           -a ${assembly} \\
           -g ${gff} \\
           -f ${snippy}/${meta.id}.aligned.fa \\

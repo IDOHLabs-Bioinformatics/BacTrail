@@ -123,14 +123,6 @@ workflow BACTRAIL_ADD {
             .groupTuple()
     )
 
-        DATABASE_VERIFY.out.organism_schema
-            .join(POPPUNK_QUERY.out.query)
-            .join(FILTER_CONTIGS.out.filtered_contigs
-                .join(FASTANI.out.organism)
-                .map { meta, assembly, organism -> tuple(organism, assembly)}
-                .groupTuple())
-            .view()
-
     //
     // MODULE: popPUNK cluster assignment
     //

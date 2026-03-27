@@ -6,12 +6,12 @@ process KRAKEN2 {
 
     input:
     tuple val(meta), path(reads)
-    val(db)
+    path(db)
 
     output:
     tuple val(meta), path("*_kraken_report.txt"), emit: report
     env("top_hit"),                               emit: top_hit
-    path("version.yml"),                         emit: version
+    path("version.yml"),                          emit: version
 
     when:
     task.ext.when == null || task.ext.when
