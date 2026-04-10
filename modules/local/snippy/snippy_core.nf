@@ -9,14 +9,14 @@ process SNIPPY_CORE {
     path(ref)
 
     output:
-    path("*.aln"),           emit: core_aln
-    path("*.full.aln"),      emit: wg_align
-    path("*.ref.fa"),        emit: ref
-    path("*.tab"),           emit: core_snps
-    path("*.txt"),           emit: stats
-    path("*.vcf"),           emit: vcf
-    path("*.self_mask.bed"), emit: bed, optional: true
-    path("version.yml"),     emit: version
+    tuple val(cluster), path("*.aln"),           emit: core_aln
+    tuple val(cluster), path("*.full.aln"),      emit: wg_align
+    tuple val(cluster), path("*.ref.fa"),        emit: ref
+    tuple val(cluster), path("*.tab"),           emit: core_snps
+    tuple val(cluster), path("*.txt"),           emit: stats
+    tuple val(cluster), path("*.vcf"),           emit: vcf
+    tuple val(cluster), path("*.self_mask.bed"), emit: bed, optional: true
+    path("version.yml"),                         emit: version
 
     when:
     task.ext.when == null || task.ext.when

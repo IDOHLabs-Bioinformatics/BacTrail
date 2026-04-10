@@ -6,11 +6,11 @@ process SNP_SITES {
 
 
     input:
-    path(alignment)
+    tuple val(cluster), path(alignment)
 
     output:
-    path("clean.core.aln"), emit: snp_selected
-    path("version.yml"),    emit: version
+    tuple val(cluster), path("*clean.core.aln"), emit: snp_selected
+    path("version.yml"),                         emit: version
 
     when:
     task.ext.when == null || task.ext.when
@@ -21,7 +21,7 @@ process SNP_SITES {
     snp-sites \\
         -c ${alignment} \\
          ${args} \\
-         > clean.core.aln
+         > ${cluster}_clean.core.aln
 
     cat << END_VERSION > version.yml
     "${task.process}":

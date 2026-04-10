@@ -4,12 +4,11 @@ process SNP_DISTS {
 
     container "staphb/snp-dists:1.2.0"
 
-
     input:
-    path(cleaned_alignment)
+    tuple val(cluster), path(cleaned_alignment)
 
     output:
-    path("dists.tsv"),      emit: snp_selected
+    path("*dists.tsv"),      emit: snp_selected
     path("version.yml"),    emit: version
 
     when:
@@ -17,7 +16,7 @@ process SNP_DISTS {
 
     script:
     """
-    snp-dists ${cleaned_alignment} > dists.tsv
+    snp-dists ${cleaned_alignment} > ${cluster}_dists.tsv
 
     cat << END_VERSION > version.yml
     "${task.process}":

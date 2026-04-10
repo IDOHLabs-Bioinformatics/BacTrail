@@ -5,11 +5,11 @@ process SNIPPY_CLEAN {
     container "staphb/snippy:4.6.0"
 
     input:
-    path(full_aln)
+    tuple val(cluster), path(full_aln)
 
     output:
-    path("clean.full.aln"), emit: cleaned
-    path("version.yml"),    emit: version
+    tuple val(cluster), path("*clean.full.aln"), emit: cleaned
+    path("version.yml"),                         emit: version
 
     when:
     task.ext.when == null || task.ext.when
@@ -20,7 +20,7 @@ process SNIPPY_CLEAN {
     snippy-clean_full_aln \\
         ${args} \\
         ${full_aln} \\
-        > clean.full.aln
+        > ${cluster}_clean.full.aln
 
     cat << END_VERSION > version.yml
     "${task.process}":
