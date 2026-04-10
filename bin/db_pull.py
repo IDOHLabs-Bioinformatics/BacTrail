@@ -47,9 +47,14 @@ if __name__ == '__main__':
             placeholders = ','.join(['?'] * len(id_list))
 
             # pull data
-            data = pd.read_sql_query(
-                f"SELECT id, assembly, gff, aligned, vcf, cluster, organism, collection_date FROM intermediate WHERE id IN ({placeholders})",
+            data1 = pd.read_sql_query(
+                f"SELECT ID, assembly, gff, aligned, vcf FROM isolate_data WHERE ID IN ({placeholders})",
                 conn, params=id_list)
+            data2 = pd.read_sql_query(
+                f"SELECT ID, cluster, organism, collection_date FROM metadata WHERE ID IN ({placeholders})",
+                conn, params=id_list)
+            
+            data = data1.merge(data2, left_on='ID', right_on='ID')
 
             organism = data['organism'].values[0]
             reference = cursor.execute("SELECT sequence FROM reference_genomes WHERE organism = ?",
@@ -57,16 +62,26 @@ if __name__ == '__main__':
             build_ref('reference', reference[0][0], 'fna')
 
             for row in data.values.tolist():
-                build_file(row[0], row[1], 'fasta', row[5])
-                build_file(row[0], row[2], 'gff', row[5])
-                build_file(row[0], row[3], 'aligned.fa', row[5])
-                build_file(row[0], row[4], 'vcf', row[5])
+                build_file(row[0], row[4], 'fasta', row[1])
+                build_file(row[0], row[5], 'gff', row[1])
+                build_file(row[0], row[6], 'aligned.fa', row[1])
+                build_file(row[0], row[7], 'vcf', row[1])
 
         elif args.organism != 'any':
             # pull data
-            data = pd.read_sql_query(
-                "SELECT id, assembly, gff, aligned, vcf, cluster, organism, collection_date FROM intermediate WHERE organism = ?",
+            data1 = pd.read_sql_query(
+                f"SELECT ID, cluster, organism, collection_date FROM metadata WHERE organism = ?",
                 conn, params=[args.organism])
+            id_list = data1['ID'].to_list()
+
+            placeholders = ','.join(['?'] * len(id_list))
+
+            data2 = pd.read_sql_query(
+                f"SELECT ID, assembly, gff, aligned, vcf FROM isolate_data WHERE ID IN ({placeholders})",
+                conn, params=id_list)
+            
+            data = data1.merge(data2, left_on='ID', right_on='ID')
+
             # if the organism is not present, raise an error
             if len(data) == 0:
                 message = "Organism '{}' is not present in {}".format(args.organism, args.database)
@@ -93,10 +108,10 @@ if __name__ == '__main__':
                                        [args.organism]).fetchall()
 
             for row in data.values.tolist():
-                build_file(row[0], row[1], 'fasta', row[5])
-                build_file(row[0], row[2], 'gff', row[5])
-                build_file(row[0], row[3], 'aligned.fa', row[5])
-                build_file(row[0], row[4], 'vcf', row[5])
+                build_file(row[0], row[4], 'fasta', row[1])
+                build_file(row[0], row[5], 'gff', row[1])
+                build_file(row[0], row[6], 'aligned.fa', row[1])
+                build_file(row[0], row[7], 'vcf', row[1])
 
             build_ref('reference', reference[0][0], 'fna')
 

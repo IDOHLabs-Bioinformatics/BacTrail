@@ -1,11 +1,11 @@
 process PANAROO {
     label 'process_high'
-    tag "${cluster}"
+    tag "core_genome"
 
     container "staphb/panaroo:1.6.0"
 
     input:
-    tuple val(cluster), path(gffs)
+    path(gffs)
 
     output:
     path("core_genome/core_gene_alignment.aln"), emit: core

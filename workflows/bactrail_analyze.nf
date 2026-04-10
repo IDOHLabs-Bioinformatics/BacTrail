@@ -108,9 +108,6 @@ workflow BACTRAIL_ANALYZE {
     snippy_input = filtered
         .map {cluster, fasta, aln, vcf, gff -> tuple(cluster, fasta, aln, vcf)}
 
-    panaroo_input = filtered
-        .map { cluster, fasta, aln, vcf, gff -> tuple(cluster, gff) }
-
     SNIPPY_CORE (
          snippy_input,
          PULL.out.reference.first()
@@ -151,12 +148,12 @@ workflow BACTRAIL_ANALYZE {
     }
     
     PANAROO (
-        panaroo_input
-        )
+        PULL.out.gff
+    )
 
     IQTREE (
         PANAROO.out.core
-        )
+    )
 
     // mix all multiqc files
     ch_versions = ch_versions.mix(PULL.out.version, SNIPPY_CORE.out.version, SNIPPY_CLEAN.out.version,

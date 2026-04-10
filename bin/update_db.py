@@ -72,10 +72,15 @@ if __name__ == '__main__':
         # create the cursor
         cursor = conn.cursor()
 
-        # make the intermediate table if not already there
-        if not check_table(cursor, 'intermediate'):
+        # make the isolate table if not already there
+        if not check_table(cursor, 'isolate_data'):
             cursor.execute(
-                "CREATE TABLE intermediate (ID TEXT PRIMARY KEY, organism TEXT, assembly TEXT, gff TEXT, aligned TEXT, vcf TEXT, cluster TEXT, collection_date TEXT)")
+                "CREATE TABLE isolate_data (ID TEXT PRIMARY KEY, assembly TEXT, gff TEXT, aligned TEXT, vcf TEXT)")
+            
+        # make the metadata table if not already there
+        if not check_table(cursor, 'metadata'):
+            cursor.execute(
+                "CREATE TABLE metadata (ID TEXT PRIMARY KEY, organism TEXT, cluster TEXT, collection_date TEXT)")
 
         # make the reference genome table if not already there
         if not check_table(cursor, 'reference_genomes'):
@@ -85,15 +90,18 @@ if __name__ == '__main__':
         # insert data
         try:
             cluster = find_cluster_id(args.id, args.clusters)
-            cursor.execute("INSERT INTO intermediate VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
-                           (args.id, args.organism, contents(args.assembly),
-                            contents(args.gff), contents(args.fasta), contents(args.vcf), cluster, args.collection_date))
+            cursor.execute("INSERT INTO isolate_data VALUES (?, ?, ?, ?, ?)",
+                           (args.id, contents(args.assembly), contents(args.gff), contents(args.fasta), contents(args.vcf)))
+            cursor.execute("INSERT INTO metadata VALUES (?, ?, ?, ?)",
+                           (args.id, args.organism, cluster, args.collection_date))
             print(f'{args.id},updated')
         except sqlite3.IntegrityError:
             if args.replace:
-                cursor.execute("INSERT OR REPLACE INTO intermediate VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
-                               (args.id, args.organism, contents(args.assembly),
-                                contents(args.gff), contents(args.fasta), contents(args.vcf), cluster, args.collection_date))
+                cluster = find_cluster_id(args.id, args.clusters)
+                cursor.execute("INSERT OR REPLACE INTO isolate_data VALUES (?, ?, ?, ?, ?)",
+                           (args.id, contents(args.assembly), contents(args.gff), contents(args.fasta), contents(args.vcf)))
+                cursor.execute("INSERT OR REPLACE INTO metadata VALUES (?, ?, ?, ?)",
+                           (args.id, args.organism, cluster, args.collection_date))
                 print(f'{args.id},overwritten')
             else:
                 print(f'{args.id},not updated')
