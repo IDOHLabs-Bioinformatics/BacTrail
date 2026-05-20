@@ -113,8 +113,6 @@ workflow NFCORE_BACTRAIL_ANALYZE {
 
 workflow ADD {
 
-    def mode = 'add'
-
     PIPELINE_INITIALISATION (
         params.version,
         params.help,
@@ -134,7 +132,7 @@ workflow ADD {
         params.replace,
         params.collection_date_start,
         params.collection_date_end,
-        mode
+        params.mode.toUpperCase()
     )
 
     NFCORE_BACTRAIL_ADD (
@@ -161,8 +159,6 @@ workflow ADD {
 
 workflow ANALYZE {
 
-    def mode = 'analyze'
-
     PIPELINE_INITIALISATION (
         params.version,
         params.help,
@@ -182,7 +178,7 @@ workflow ANALYZE {
         params.replace,
         params.collection_date_start,
         params.collection_date_end,
-        mode
+        params.mode.toUpperCase()
     )
 
     NFCORE_BACTRAIL_ANALYZE (
@@ -202,6 +198,19 @@ workflow ANALYZE {
         params.monochrome_logs,
         params.hook_url
     )
+}
+
+
+workflow {
+    if (params.mode.toUpperCase() == 'ADD') {
+        ADD()
+    }
+    else if (params.mode.toUpperCase() == 'ANALYZE') {
+        ANALYZE()
+    }
+    else {
+        "Invalid mode: Use either 'ADD' or 'ANALYZE'"
+    }
 }
 
 

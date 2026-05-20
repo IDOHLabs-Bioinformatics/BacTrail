@@ -96,7 +96,7 @@ workflow PIPELINE_INITIALISATION {
     //
     // Check the mode specific parameters
     //
-    if (mode == 'add') {
+    if (mode == 'ADD') {
         reference_list = reference_list ?: "${projectDir}/assets/fastANI_reference_list.txt"
         Channel.fromPath(reference_list, checkIfExists: true)
             .set { ch_reference_list }
@@ -140,7 +140,7 @@ workflow PIPELINE_INITIALISATION {
             .set { ch_samplesheet }
     }
 
-    else if (mode == 'analyze') {
+    else if (mode == 'ANALYZE') {
         // prepare dates to check
         def formatter = DateTimeFormatter.ofPattern("MM-dd-yyyy")
         def date1 = LocalDate.parse(collection_date_start, formatter)

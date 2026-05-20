@@ -29,6 +29,11 @@
                     "description": "The output directory where the results will be saved. You have to use absolute paths to storage on Cloud infrastructure.",
                     "fa_icon": "fas fa-folder-open"
                 },
+                "mode": {
+                    "type": "string",
+                    "description": "Which BacTrail mode to use for the run, either ADD or ANALYZE",
+                    "pattern": "ADD|add|ANALYZE|analyze"
+                },
                 "length_required": {
                     "type": "integer",
                     "description": "The minimum length required to pass fastp filtering. Default is 50.",
@@ -100,7 +105,6 @@
                     "pattern": "true|false|True|False"
                 },
                 "cluster": {
-                    "type": "string",
                     "default": "all",
                     "description": "The ID of the cluster to analyze. If not provided all isolates from the provided organism will be analyzed"
                 },
