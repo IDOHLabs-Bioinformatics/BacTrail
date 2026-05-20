@@ -96,12 +96,45 @@ workflow PIPELINE_INITIALISATION {
     //
     // Check the mode specific parameters
     //
+    def failing = false
     if (mode == 'ADD') {
-        reference_list = reference_list ?: "${projectDir}/assets/fastANI_reference_list.txt"
+        // check non-required parameters
+        if (schema_dir == null) {
+            println("Parameter 'schema_dir' is required for the 'ADD' mode.")
+            failing = true
+        }
+        if (kraken2_db == null) {
+            println("Parameter 'kraken2_db' is required for the 'ADD' mode.")
+            failing = true
+        }
+        if (reference_list == null) {
+            println("Parameter 'reference_list' is required for the 'ADD' mode.")
+            failing = true
+        }
+        if (reference_dir == null) {
+            println("Parameter 'reference_dir' is required for the 'ADD' mode.")
+            failing = true
+        }
+        if (input == null) {
+            println("Parameter 'input' is required for the 'ADD' mode.")
+            failing = true
+        }
+        if (outdir == null) {
+            println("Parameter 'outdir' is required for the 'ADD' mode.")
+            failing = true
+        }
+        if (db_name == null) {
+            println("Parameter 'db_name' is required for the 'ADD' mode.")
+            failing = true
+        }
+        if (failing) {
+            println('Please re-launch, providing all the neccessary parameters.')
+            exit(1)
+        }
+
         Channel.fromPath(reference_list, checkIfExists: true)
             .set { ch_reference_list }
 
-        reference_dir = reference_dir ?: "${projectDir}/assets/references"
         Channel.fromPath(reference_dir, checkIfExists: true)
             .set { ch_reference_dir }
 
