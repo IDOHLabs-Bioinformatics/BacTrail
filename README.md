@@ -1,70 +1,102 @@
-<h1>
-  <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="docs/images/nf-core-bactrail_logo_dark.png">
-    <img alt="nf-core/bactrail" src="docs/images/nf-core-bactrail_logo_light.png">
-  </picture>
-</h1>
+# Introduction 
+<img src='docs/images/Benny_the_BacTrail_detective.png' align="right" height="300" />
 
-[![GitHub Actions CI Status](https://github.com/nf-core/bactrail/actions/workflows/ci.yml/badge.svg)](https://github.com/nf-core/bactrail/actions/workflows/ci.yml)
-[![GitHub Actions Linting Status](https://github.com/nf-core/bactrail/actions/workflows/linting.yml/badge.svg)](https://github.com/nf-core/bactrail/actions/workflows/linting.yml)[![AWS CI](https://img.shields.io/badge/CI%20tests-full%20size-FF9900?labelColor=000000&logo=Amazon%20AWS)](https://nf-co.re/bactrail/results)[![Cite with Zenodo](http://img.shields.io/badge/DOI-10.5281/zenodo.XXXXXXX-1073c8?labelColor=000000)](https://doi.org/10.5281/zenodo.XXXXXXX)
-[![nf-test](https://img.shields.io/badge/unit_tests-nf--test-337ab7.svg)](https://www.nf-test.com)
+<p style="width: 1000px;">**BacTrail** is a pipeline that is designed to perform actively passive surviellance of bacterial pathogens, and is composed of 2 workflows, ADD and ANALYZE. The idea is to take sequenced isolates and run the ADD workflow, which places metadata, annotation, an assembly, an alignment, and importantly, a cluster group ID in a SQLite database for each isolate. The cluster ID can lets users quickly and automatically identify isolates that roughly similar, one can imagine a large family tree. The workflow, ANALYZE, can then utilize the knowledge of which isolates are already somewhat similar, and perform a fine-grained relatedness analysis identifying which, if any, of the isolates in large family tree are highly related. To return to the family tree, this is similar to identifying which are siblings from within the more diverse family tree.</p>
 
-[![Nextflow](https://img.shields.io/badge/nextflow%20DSL2-%E2%89%A523.04.0-23aa62.svg)](https://www.nextflow.io/)
-[![run with conda](http://img.shields.io/badge/run%20with-conda-3EB049?labelColor=000000&logo=anaconda)](https://docs.conda.io/en/latest/)
-[![run with docker](https://img.shields.io/badge/run%20with-docker-0db7ed?labelColor=000000&logo=docker)](https://www.docker.com/)
-[![run with singularity](https://img.shields.io/badge/run%20with-singularity-1d355c.svg?labelColor=000000)](https://sylabs.io/docs/)
-[![Launch on Seqera Platform](https://img.shields.io/badge/Launch%20%F0%9F%9A%80-Seqera%20Platform-%234256e7)](https://tower.nf/launch?pipeline=https://github.com/nf-core/bactrail)
 
-[![Get help on Slack](http://img.shields.io/badge/slack-nf--core%20%23bactrail-4A154B?labelColor=000000&logo=slack)](https://nfcore.slack.com/channels/bactrail)[![Follow on Twitter](http://img.shields.io/badge/twitter-%40nf__core-1DA1F2?labelColor=000000&logo=twitter)](https://twitter.com/nf_core)[![Follow on Mastodon](https://img.shields.io/badge/mastodon-nf__core-6364ff?labelColor=FFFFFF&logo=mastodon)](https://mstdn.science/@nf_core)[![Watch on YouTube](http://img.shields.io/badge/youtube-nf--core-FF0000?labelColor=000000&logo=youtube)](https://www.youtube.com/c/nf-core)
+<table>
+  <tr>
+    <td>
+      <h3>ADD Workflow</h3>
+      <img src="docs/images/BacTrail_ADD.png" width="500">
+    </td>
+    <td>
+      <h3>ANALYZE Workflow</h3>
+      <p><br></p>
+      <img src="docs/images/BacTrail_ANALYZE.png" width="600">
+      <p><br></p>
+    </td>
+  </tr>
+</table>
 
-## Introduction
 
-**nf-core/bactrail** is a bioinformatics pipeline that ...
-
-<!-- TODO nf-core:
-   Complete this sentence with a 2-3 sentence summary of what types of data the pipeline ingests, a brief overview of the
-   major pipeline sections and the types of output it produces. You're giving an overview to someone new
-   to nf-core here, in 15-20 seconds. For an example, see https://github.com/nf-core/rnaseq/blob/master/README.md#introduction
--->
-
-<!-- TODO nf-core: Include a figure that guides the user through the major workflow steps. Many nf-core
-     workflows use the "tube map" design for that. See https://nf-co.re/docs/contributing/design_guidelines#examples for examples.   -->
-<!-- TODO nf-core: Fill in short bullet-pointed list of the default steps in the pipeline -->
-
-1. Read QC ([`FastQC`](https://www.bioinformatics.babraham.ac.uk/projects/fastqc/))
-2. Present QC for raw reads ([`MultiQC`](http://multiqc.info/))
-
-## Usage
-
+# Usage
 > [!NOTE]
 > If you are new to Nextflow and nf-core, please refer to [this page](https://nf-co.re/docs/usage/installation) on how to set-up Nextflow. Make sure to [test your setup](https://nf-co.re/docs/usage/introduction#how-to-run-a-pipeline) with `-profile test` before running the workflow on actual data.
 
-<!-- TODO nf-core: Describe the minimum required steps to execute the pipeline, e.g. how to prepare samplesheets.
-     Explain what rows and columns represent. For instance (please edit as appropriate):
+The two workflows in this pipeline are run independently of eachother, and the workflow chosen is dependent on the goal. If the user wants to add more isolates to the database, then the ADD workflow should be chosen. If the user wants to perform relatedness analysis on the isolates already present in the database, the ANALYZE workflow should be chosen. In order to run the ANALYZE workflow, the isolates <em>must</em> be present in the database first.
 
-First, prepare a samplesheet with your input data that looks as follows:
+<h3>ADD Workflow</h3>
 
-`samplesheet.csv`:
+The add workflow requires the following parameters:
+```
+  - samplesheet
+    • csv file path, format described below
+  - outdir
+    • path for a diectory to hold the output
+  - db_name
+    • path to the database that will hold the isolate information, does not need to exist beforehand
+  - schema_dir
+    • path to a directory that contains popPUNK schemas
+  - kraken2_db database path
+    • path to a Kraken2 database
+  - reference_list
+    • text file containing the path to the reference genomes used with FastANI
+  - reference_dir
+    • directory containing the bacterial reference sequences to use with FastANI
+```
+An example samplesheet with the required columns are below.
 
+`samplesheet.csv`
 ```csv
-sample,fastq_1,fastq_2
-CONTROL_REP1,AEG588A1_S1_L002_R1_001.fastq.gz,AEG588A1_S1_L002_R2_001.fastq.gz
+sample,fastq1,fastq1,collection_date
+sampleID,sample_R1.fastq.gz,sample_R2.fastq.gz,MM-DD-YYYY
 ```
 
-Each row represents a fastq file (single-end) or a pair of fastq files (paired end).
-
--->
-
-Now, you can run the pipeline using:
-
-<!-- TODO nf-core: update the following command to include all required parameters for a minimal example -->
-
-```bash
-nextflow run nf-core/bactrail \
-   -profile <docker/singularity/.../institute> \
-   --input samplesheet.csv \
-   --outdir <OUTDIR>
+The workflow is run with the command:
 ```
+ nextflow run BacTrail \
+    --mode ADD \
+    --input samplesheet.csv \
+    --outdir results \
+    --db_name bactrail.db \
+    --schema_dir schemas \
+    --kraken2_db kraken2db \
+    --reference_list reference_paths.txt \
+    --reference_dir FastANI_references \
+    -profile [docker/singularity]
+```
+
+<h3>ADD Workflow Output</h3>
+
+The ADD workflow has 2 main output files. The first of these is the MultiQC report, which is located at ```[outdir]/multiqc/multiqc_report.html```. This contains all of the quality information about the isolates that were just added to the database. The second is located at ```[outdir]/write_status/insert_status.csv```. This a csv with the columns: Sample, Status, and Cluster and shows if the sample was successfully added, and importantly which popPUNK cluster the isolate was assigned to. The cluster lets the user know if isolates are somewhat similar, and is an indication that a fine-grained analysis with the ANALYZE workflow is meritted for that sample.
+
+<h3>Isolate Database ER Diagram</h3>
+
+![Database ER](docs/images/DB_ER.png)
+
+<h3>ANALYZE Workflow</h3>
+
+The ANALYZE workflow requires the following parameters:
+```
+  - db_name
+    • path to the database that will hold the isolate information, does not need to exist beforehand
+  - organism
+    • Which organism in the database to analyze
+  - outdir
+    • path for a diectory to hold the output
+```
+The workflow is run with the command:
+```
+ nextflow run BacTrail \
+    --mode ANALYZE \
+    --outdir results \
+    --db_name bactrail.db \
+    --organism [Klebsiella_pneumoniae/Escherichia_coli/...]
+    -profile [docker/singularity]
+```
+
+
 
 > [!WARNING]
 > Please provide pipeline parameters via the CLI or Nextflow `-params-file` option. Custom config files including those provided by the `-c` Nextflow option can be used to provide any configuration _**except for parameters**_;
@@ -80,17 +112,7 @@ For more details about the output files and reports, please refer to the
 
 ## Credits
 
-nf-core/bactrail was originally written by David Schaeper.
-
-We thank the following people for their extensive assistance in the development of this pipeline:
-
-<!-- TODO nf-core: If applicable, make list of people who have also contributed -->
-
-## Contributions and Support
-
-If you would like to contribute to this pipeline, please see the [contributing guidelines](.github/CONTRIBUTING.md).
-
-For further information or help, don't hesitate to get in touch on the [Slack `#bactrail` channel](https://nfcore.slack.com/channels/bactrail) (you can join with [this invite](https://nf-co.re/join/slack)).
+BacTrail was originally written by David Schaeper.
 
 ## Citations
 
