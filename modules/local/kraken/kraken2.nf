@@ -29,7 +29,14 @@ process KRAKEN2 {
         ${reads[1]} \\
         > /dev/null
 
-    top_hit=\$(awk '\$4 == "S"' ${prefix}_kraken_report.txt | sort -nrk2 | head -n 1 | awk -F '  ' '{print\$NF}' | sed 's/^[      ]*//' | sed 's/ /_/g')
+    awk '\$4 == "S"' ${prefix}_kraken_report.txt > species.txt
+    sort -nrk2 species.txt > sorted_species.txt
+    head -n 1 sorted_species.txt > top_species.txt
+    awk -F '  ' '{print\$NF}' > organism.txt
+    sed -i 's/^[      ]*//' organism.txt 
+    sed -i 's/ /_/g' organism.txt
+
+    top_hit=\$(cat organism.txt)
 
     cat << END_VERSIONS > version.yml
     "${task.process}":

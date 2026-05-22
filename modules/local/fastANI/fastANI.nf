@@ -1,6 +1,7 @@
 process FASTANI {
     label 'process_medium'
     tag "${meta.id}"
+    maxForks 1
 
     container "staphb/fastani:1.34"
 
@@ -31,8 +32,12 @@ process FASTANI {
         ${args} \\
         2> ${prefix}_fastANI.log
 
-    ref=\$(head -n 1 ${prefix}_fastANI.txt | cut -f 2)
-    organism=\$(printf "%s_%s" "\$(head -n 1 \$ref | awk '{print\$2}')" "\$(head -n 1 \$ref | awk '{print\$3}')")
+    head -n 1 ${prefix}_fastANI.txt > top_hit.txt 
+    ref=\$(cut -f 2 top_hit.txt)
+    head -n 1 \$ref > fasta_head.txt
+    genus=\$(awk '{print\$2}' fasta_head.txt)
+    species=\$(awk '{print\$3}' fasta_head.txt)
+    organism=\$(printf "%s_%s" \$genus \$species)
 
     cat << END_VERSIONS > version.yml
     "${task.process}":
