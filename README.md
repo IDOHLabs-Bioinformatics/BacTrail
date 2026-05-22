@@ -1,24 +1,20 @@
 # Introduction 
-<img src='docs/images/Benny_the_BacTrail_detective.png' align="right" height="300" />
+<img src='docs/images/Benny_the_BacTrail_Detective.png' align="right" height="300">
 
 <p style="width: 1000px;">**BacTrail** is a pipeline that is designed to perform actively passive surviellance of bacterial pathogens, and is composed of 2 workflows, ADD and ANALYZE. The idea is to take sequenced isolates and run the ADD workflow, which places metadata, annotation, an assembly, an alignment, and importantly, a cluster group ID in a SQLite database for each isolate. The cluster ID can lets users quickly and automatically identify isolates that roughly similar, one can imagine a large family tree. The workflow, ANALYZE, can then utilize the knowledge of which isolates are already somewhat similar, and perform a fine-grained relatedness analysis identifying which, if any, of the isolates in large family tree are highly related. To return to the family tree, this is similar to identifying which are siblings from within the more diverse family tree.</p>
 
+<h3>ADD Workflow</h3>
+<center>
 
-<table>
-  <tr>
-    <td>
-      <h3>ADD Workflow</h3>
-      <img src="docs/images/BacTrail_ADD.png" width="500">
-    </td>
-    <td>
-      <h3>ANALYZE Workflow</h3>
-      <p><br></p>
-      <img src="docs/images/BacTrail_ANALYZE.png" width="600">
-      <p><br></p>
-    </td>
-  </tr>
-</table>
+![Database ER](docs/images/BacTrail_ADD.png)
 
+</center>
+<h3>ANALYZE Workflow</h3>
+<center>
+
+![Database ER](docs/images/BacTrail_ANALYZE.png)
+
+</center>
 
 # Usage
 > [!NOTE]
