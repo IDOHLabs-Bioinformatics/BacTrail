@@ -19,6 +19,7 @@ include { FILTER_CONTIGS         } from '../modules/local/seqtk/main.nf'
 include { QUAST                  } from '../modules/local/quast/main.nf'
 include { BUSCO                  } from '../modules/local/busco/main.nf'
 include { FASTANI                } from '../modules/local/fastANI/fastANI.nf'
+include { EXTRACT_HIT            } from '../modules/local/fastANI/extract_hit.nf'
 include { POPPUNK_QUERY          } from '../modules/local/poppunk_query.nf'
 include { PROKKA                 } from '../modules/local/prokka/prokka.nf'
 include { UPDATE_DB              } from '../modules/local/database/update_db.nf'
@@ -46,6 +47,7 @@ workflow BACTRAIL_ADD {
 
     //
     // MODULE: fastp
+    //
     FASTP (
         ch_samplesheet
             .map{ meta, reads, collection_date -> tuple(meta, reads) },
@@ -98,8 +100,13 @@ workflow BACTRAIL_ADD {
         ch_reference_dir.first()
     )
 
+    EXTRACT_HIT(
+        FASTANI.out.ani,
+        ch_reference_dir.first()
+    )
+
     // select unique organisms
-    unique_organisms = FASTANI.out.organism
+    unique_organisms = EXTRACT_HIT.out.organism
         .map { meta, organism -> organism }
         .collect()
         .flatten()
@@ -118,7 +125,7 @@ workflow BACTRAIL_ADD {
     //
     POPPUNK_QUERY (
         FILTER_CONTIGS.out.filtered_contigs
-            .join(FASTANI.out.organism)
+            .join(EXTRACT_HIT.out.organism)
             .map { meta, assembly, organism -> tuple(organism, assembly)}
             .groupTuple()
     )
@@ -130,7 +137,7 @@ workflow BACTRAIL_ADD {
         DATABASE_VERIFY.out.organism_schema
             .join(POPPUNK_QUERY.out.query)
             .join(FILTER_CONTIGS.out.filtered_contigs
-                .join(FASTANI.out.organism)
+                .join(EXTRACT_HIT.out.organism)
                 .map { meta, assembly, organism -> tuple(organism, assembly)}
                 .groupTuple()),
         ch_schema_dir.first()
@@ -148,7 +155,7 @@ workflow BACTRAIL_ADD {
     //
     SNIPPY (
         FASTP.out.trimmed
-            .join(FASTANI.out.best_hit_ref)
+            .join(EXTRACT_HIT.out.best_hit_ref)
     )
 
     UPDATE_DB (
@@ -158,7 +165,7 @@ workflow BACTRAIL_ADD {
         .join(ch_samplesheet
                 .map { meta, reads, collection_date -> tuple(meta, collection_date) }
         )
-        .join(FASTANI.out.organism)
+        .join(EXTRACT_HIT.out.organism)
         .map { meta, assembly, gff, snippy, collection_date, organism -> tuple(organism, meta, assembly, gff, snippy, collection_date) }
         .combine(POPPUNK_ASSIGN.out.clusters, by: 0),
         ch_db.first(),
