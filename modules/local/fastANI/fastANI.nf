@@ -20,7 +20,7 @@ process FASTANI {
 
     script:
     def args = task.ext.args ?: ''
-    def prefix = task.ext.prefix = "${meta.id}"
+    def prefix = task.ext.prefix ?: "${meta.id}"
     """
     fastANI \\
         -q ${assembly} \\
@@ -37,7 +37,7 @@ process FASTANI {
     """
 
     stub:
-    def prefix = task.ext.prefix = "${meta.id}"
+    def prefix = task.ext.prefix ?: "${meta.id}"
     """
     touch ${prefix}_fastANI.txt
     touch ${prefix}_fastANI.log

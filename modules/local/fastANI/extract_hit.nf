@@ -18,7 +18,7 @@ process EXTRACT_HIT {
 
     script:
     def args = task.ext.args ?: ''
-    def prefix = task.ext.prefix = "${meta.id}"
+    def prefix = task.ext.prefix ?: "${meta.id}"
     """
     top_fastANI.py > output.txt
     ref=\$(head -n 1 output.txt)
@@ -31,7 +31,7 @@ process EXTRACT_HIT {
     """
 
     stub:
-    def prefix = task.ext.prefix = "${meta.id}"
+    def prefix = task.ext.prefix ?: "${meta.id}"
     """
     ref='test'
     organism='test'
