@@ -32,7 +32,7 @@ process FASTANI {
 
     cat << END_VERSIONS > version.yml
     "${task.process}":
-        fastANI: \$(fastANI -v 2>&1 | head -n 1 | cut -d ' ' -f 2)
+        fastANI: \$(fastANI --version 2>&1 | head -n 1 | cut -d ' ' -f 2)
     END_VERSIONS
     """
 
@@ -44,7 +44,7 @@ process FASTANI {
 
     cat << END_VERSIONS > version.yml
     "${task.process}":
-        fastANI: \$(fastANI -v 2>&1 | head -n 1 | cut -d ' ' -f 2)
+        fastANI: \$(fastANI --version 2>&1 | head -n 1 | cut -d ' ' -f 2)
     END_VERSIONS
     """
 }
