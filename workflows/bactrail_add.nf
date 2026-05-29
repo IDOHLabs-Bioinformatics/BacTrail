@@ -95,93 +95,91 @@ workflow BACTRAIL_ADD {
     // MODULE: fastANI
     //
     FASTANI (
-        FILTER_CONTIGS.out.filtered_contigs,
-        ch_reference_list.first(),
-        ch_reference_dir.first()
-    )
-
-    EXTRACT_HIT(
-        FASTANI.out.ani,
-        ch_reference_dir.first()
-    )
-
-    // select unique organisms
-    unique_organisms = EXTRACT_HIT.out.organism
-        .map { meta, organism -> organism }
-        .collect()
-        .flatten()
-        .unique()
-
-    //
-    // MODULE: Database verify
-    //
-    DATABASE_VERIFY (
-        ch_schema_dir.first(),
-        unique_organisms
-    )
-
-    //
-    // MODULE: Make popPUNK query file
-    //
-    POPPUNK_QUERY (
-        FILTER_CONTIGS.out.filtered_contigs
-            .join(EXTRACT_HIT.out.organism)
-            .map { meta, assembly, organism -> tuple(organism, assembly)}
-            .groupTuple()
-    )
-
-    //
-    // MODULE: popPUNK cluster assignment
-    //
-    POPPUNK_ASSIGN (
-        DATABASE_VERIFY.out.organism_schema
-            .join(POPPUNK_QUERY.out.query)
-            .join(FILTER_CONTIGS.out.filtered_contigs
-                .join(EXTRACT_HIT.out.organism)
-                .map { meta, assembly, organism -> tuple(organism, assembly)}
-                .groupTuple()),
-        ch_schema_dir.first()
-    )
-
-    //
-    // MODULE: Prokka
-    //
-    PROKKA (
         FILTER_CONTIGS.out.filtered_contigs
     )
 
-    //
-    // MODULE: Snippy
-    //
-    SNIPPY (
-        FASTP.out.trimmed
-            .join(EXTRACT_HIT.out.best_hit_ref)
-    )
+    // EXTRACT_HIT(
+    //     FASTANI.out.ani,
+    //     ch_reference_dir.first()
+    // )
 
-    UPDATE_DB (
-        FILTER_CONTIGS.out.filtered_contigs
-        .join(PROKKA.out.gff)
-        .join(SNIPPY.out.results)
-        .join(ch_samplesheet
-                .map { meta, reads, collection_date -> tuple(meta, collection_date) }
-        )
-        .join(EXTRACT_HIT.out.organism)
-        .map { meta, assembly, gff, snippy, collection_date, organism -> tuple(organism, meta, assembly, gff, snippy, collection_date) }
-        .combine(POPPUNK_ASSIGN.out.clusters, by: 0),
-        ch_db.first(),
-        params.replace.toString().capitalize()
-    )
+    // // select unique organisms
+    // unique_organisms = EXTRACT_HIT.out.organism
+    //     .map { meta, organism -> organism }
+    //     .collect()
+    //     .flatten()
+    //     .unique()
 
-    WRITE_STATUS(
-        UPDATE_DB.out.status.collect()
-    )
+    // //
+    // // MODULE: Database verify
+    // //
+    // DATABASE_VERIFY (
+    //     ch_schema_dir.first(),
+    //     unique_organisms
+    // )
 
-    ch_versions = ch_versions.mix(DATABASE_VERIFY.out.version, FASTP.out.version, KRAKEN2.out.version, SPADES.out.version,
-        FILTER_CONTIGS.out.version, QUAST.out.version, BUSCO.out.version, FASTANI.out.version, POPPUNK_QUERY.out.version,
-        POPPUNK_ASSIGN.out.version, PROKKA.out.version, SNIPPY.out.version, UPDATE_DB.out.version)
+    // //
+    // // MODULE: Make popPUNK query file
+    // //
+    // POPPUNK_QUERY (
+    //     FILTER_CONTIGS.out.filtered_contigs
+    //         .join(EXTRACT_HIT.out.organism)
+    //         .map { meta, assembly, organism -> tuple(organism, assembly)}
+    //         .groupTuple()
+    // )
 
-    ch_multiqc_files = ch_multiqc_files.mix(KRAKEN2.out.report.collect{it[1]}, FASTP.out.json.collect{it[1]},
-        QUAST.out.report_tsv.collect{it[1]}, BUSCO.out.busco.collect{it[1]}, SNIPPY.out.summary.collect{it[1]})
+    // //
+    // // MODULE: popPUNK cluster assignment
+    // //
+    // POPPUNK_ASSIGN (
+    //     DATABASE_VERIFY.out.organism_schema
+    //         .join(POPPUNK_QUERY.out.query)
+    //         .join(FILTER_CONTIGS.out.filtered_contigs
+    //             .join(EXTRACT_HIT.out.organism)
+    //             .map { meta, assembly, organism -> tuple(organism, assembly)}
+    //             .groupTuple()),
+    //     ch_schema_dir.first()
+    // )
+
+    // //
+    // // MODULE: Prokka
+    // //
+    // PROKKA (
+    //     FILTER_CONTIGS.out.filtered_contigs
+    // )
+
+    // //
+    // // MODULE: Snippy
+    // //
+    // SNIPPY (
+    //     FASTP.out.trimmed
+    //         .join(EXTRACT_HIT.out.best_hit_ref)
+    // )
+
+    // UPDATE_DB (
+    //     FILTER_CONTIGS.out.filtered_contigs
+    //     .join(PROKKA.out.gff)
+    //     .join(SNIPPY.out.results)
+    //     .join(ch_samplesheet
+    //             .map { meta, reads, collection_date -> tuple(meta, collection_date) }
+    //     )
+    //     .join(EXTRACT_HIT.out.organism)
+    //     .map { meta, assembly, gff, snippy, collection_date, organism -> tuple(organism, meta, assembly, gff, snippy, collection_date) }
+    //     .combine(POPPUNK_ASSIGN.out.clusters, by: 0),
+    //     ch_db.first(),
+    //     params.replace.toString().capitalize()
+    // )
+
+    // WRITE_STATUS(
+    //     UPDATE_DB.out.status.collect()
+    // )
+
+    // ch_versions = ch_versions.mix(DATABASE_VERIFY.out.version, FASTP.out.version, KRAKEN2.out.version, SPADES.out.version,
+    //     FILTER_CONTIGS.out.version, QUAST.out.version, BUSCO.out.version, FASTANI.out.version, POPPUNK_QUERY.out.version,
+    //     POPPUNK_ASSIGN.out.version, PROKKA.out.version, SNIPPY.out.version, UPDATE_DB.out.version)
+
+    // ch_multiqc_files = ch_multiqc_files.mix(KRAKEN2.out.report.collect{it[1]}, FASTP.out.json.collect{it[1]},
+    //     QUAST.out.report_tsv.collect{it[1]}, BUSCO.out.busco.collect{it[1]}, SNIPPY.out.summary.collect{it[1]})
 
     //
     // Collate and save software versions
