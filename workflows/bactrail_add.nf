@@ -95,7 +95,8 @@ workflow BACTRAIL_ADD {
     // MODULE: fastANI
     //
     FASTANI (
-        FILTER_CONTIGS.out.filtered_contigs
+        FILTER_CONTIGS.out.filtered_contigs,
+        ch_reference_list.first()
     )
 
     // EXTRACT_HIT(

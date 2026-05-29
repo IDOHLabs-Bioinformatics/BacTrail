@@ -6,6 +6,7 @@ process FASTANI {
 
     input:
     tuple val(meta), path(assembly)
+    path(reference_list)
 
     output:
     path("version.yml"),                  emit: version
