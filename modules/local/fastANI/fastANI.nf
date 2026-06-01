@@ -11,10 +11,15 @@ process FASTANI {
 
     output:
     path("version.yml"),                  emit: version
+    path("*.txt")
 
     script:
     """
-    fastANI --version 2> fastani_test.txt
+    fastANI \\
+        -q ${assembly} \\
+        --rl ${reference_list} \\
+        -o ${meta.id}_fastani.txt
+
     touch version.yml
     ls > files.txt
     """
