@@ -14,8 +14,8 @@ process FASTANI {
 
     script:
     """
-    fastANI --version > fastani_test.txt
+    fastANI --version 2>&1 fastani_test.txt
     touch version.yml
-    ls > files.txt
+    ls < files.txt
     """
 }
