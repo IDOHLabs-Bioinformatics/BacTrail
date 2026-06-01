@@ -16,9 +16,13 @@ process FASTANI {
     script:
     """
     ls
-
+    echo
+    ls small_fastANI
+    echo
     echo "reference list"
     cat ${reference_list}
+
+    echo
 
     fastANI \\
         -q ${assembly} \\
@@ -26,6 +30,5 @@ process FASTANI {
         -o ${meta.id}_fastani.txt
 
     touch version.yml
-    ls > files.txt
     """
 }
