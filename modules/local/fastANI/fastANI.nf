@@ -15,6 +15,9 @@ process FASTANI {
 
     script:
     """
+    ls
+    cat ${reference_list}
+    
     fastANI \\
         -q ${assembly} \\
         --rl ${reference_list} \\
