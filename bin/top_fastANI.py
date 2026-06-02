@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
 
 import os
+import sys
 
 if __name__ == '__main__':
-    files = os.listdir()
-    result = [file for file in files if file.find('_fastANI.txt') != -1][0]
+    result = sys.argv[1]
 
     with open(result) as ani:
         top = ani.readline().strip()

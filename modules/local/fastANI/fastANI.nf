@@ -1,6 +1,7 @@
 process FASTANI {
     label 'process_medium'
     tag "${meta.id}"
+    maxForks 1
 
     container "staphb/fastani:1.34"
 
@@ -10,25 +11,29 @@ process FASTANI {
     path(reference_dir)
 
     output:
-    path("version.yml"),                  emit: version
-    path("*.txt")
+    tuple val(meta), path("*_fastani.txt"), emit: ani
+    path("version.yml"), emit: version
 
     script:
     """
-    ls
-    echo
-    ls small_fastANI
-    echo
-    echo "reference list"
-    cat ${reference_list}
-
-    echo
-
     fastANI \\
         -q ${assembly} \\
         --rl ${reference_list} \\
         -o ${meta.id}_fastani.txt
 
-    touch version.yml
+    cat << END_VERSIONS > version.yml
+    "${task.process}":
+        fastANI: \$(fastANI --version 2>&1 | head -n 1 | cut -d ' ' -f 2)
+    END_VERSIONS
+    """
+
+    stub:
+    """
+    touch ${meta.id}_fastani.txt
+
+    cat << END_VERSIONS > version.yml
+    "${task.process}":
+        fastANI: \$(fastANI --version 2>&1 | head -n 1 | cut -d ' ' -f 2)
+    END_VERSIONS
     """
 }
