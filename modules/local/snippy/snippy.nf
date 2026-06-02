@@ -6,6 +6,7 @@ process SNIPPY {
 
     input:
     tuple val(meta), path(reads), path(ref)
+    path(reference_dir)
 
     output:
     tuple val(meta), path("${meta.id}_snippy"),       emit: results

@@ -160,7 +160,8 @@ workflow BACTRAIL_ADD {
     //
     SNIPPY (
         FASTP.out.trimmed
-            .join(EXTRACT_HIT.out.best_hit_ref)
+            .join(EXTRACT_HIT.out.best_hit_ref),
+        ch_reference_dir.first()
     )
 
     UPDATE_DB (
