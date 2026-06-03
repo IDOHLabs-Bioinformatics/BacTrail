@@ -11,6 +11,7 @@ process UPDATE_DB {
     val replace
 
     output:
+    path("${db_name}")
     env(status),         emit: status
     path("version.yml"), emit: version
 
