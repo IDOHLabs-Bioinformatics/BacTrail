@@ -7,7 +7,7 @@ process PULL {
     input:
     val(organism)
     val(sample_list)
-    val(database)
+    path(database)
     val(cluster)
     val(collection_date_start)
     val(collection_date_end)
