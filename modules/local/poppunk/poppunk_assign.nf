@@ -6,7 +6,7 @@ process POPPUNK_ASSIGN {
 
     input:
     tuple val(organism), val(db), path(query), path(assembly)
-    val(schema_base)
+    path(schema_base)
 
     output:
     tuple val(organism), path("*poppunk_clusters.csv"), emit: clusters
