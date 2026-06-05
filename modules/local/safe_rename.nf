@@ -2,7 +2,7 @@ process SAFE_RENAME {
     tag "${meta[0]}"
     label = 'process_single'
 
-    conatiner 'staphb/pandas:3.0.1'
+    container 'staphb/pandas:3.0.1'
 
     input:
     tuple val(meta), path(fasta), val(clean_fasta), path(aligned_fa), val(clean_aligned_fa), path(vcf), val(clean_vcf), path(gff), val(clean_gff)
