@@ -7,10 +7,11 @@ process UPDATE_DB {
 
     input:
     tuple val(organism), val(meta), path(assembly), path(gff), path(snippy), val(collection_date), path(clusters)
-    val db_name
+    path db_name
     val replace
 
     output:
+    path("${db_name}")
     env(status),         emit: status
     path("version.yml"), emit: version
 

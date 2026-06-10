@@ -11,24 +11,15 @@ process FASTANI {
     path(reference_dir)
 
     output:
-    tuple val(meta), path("${meta.id}_fastANI.txt"), emit: ani
-    tuple val(meta), path("${meta.id}_fastANI.log"), emit: log
-    path("version.yml"),                             emit: version
-
-    when:
-    task.ext.when == null || task.ext.when
+    tuple val(meta), path("*_fastani.txt"), emit: ani
+    path("version.yml"), emit: version
 
     script:
-    def args = task.ext.args ?: ''
-    def prefix = task.ext.prefix ?: "${meta.id}"
     """
     fastANI \\
         -q ${assembly} \\
         --rl ${reference_list} \\
-        -o ${prefix}_fastANI.txt \\
-        -t ${task.cpus} \\
-        ${args} \\
-        2> ${prefix}_fastANI.log
+        -o ${meta.id}_fastani.txt
 
     cat << END_VERSIONS > version.yml
     "${task.process}":
@@ -37,10 +28,8 @@ process FASTANI {
     """
 
     stub:
-    def prefix = task.ext.prefix ?: "${meta.id}"
     """
-    touch ${prefix}_fastANI.txt
-    touch ${prefix}_fastANI.log
+    touch ${meta.id}_fastani.txt
 
     cat << END_VERSIONS > version.yml
     "${task.process}":

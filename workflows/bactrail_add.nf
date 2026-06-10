@@ -105,12 +105,17 @@ workflow BACTRAIL_ADD {
         ch_reference_dir.first()
     )
 
+    EXTRACT_HIT.out.best_hit_ref.view()
+    EXTRACT_HIT.out.organism.view()
+
     // select unique organisms
     unique_organisms = EXTRACT_HIT.out.organism
         .map { meta, organism -> organism }
         .collect()
         .flatten()
         .unique()
+
+    unique_organisms.view()
 
     //
     // MODULE: Database verify
@@ -155,7 +160,8 @@ workflow BACTRAIL_ADD {
     //
     SNIPPY (
         FASTP.out.trimmed
-            .join(EXTRACT_HIT.out.best_hit_ref)
+            .join(EXTRACT_HIT.out.best_hit_ref),
+        ch_reference_dir.first()
     )
 
     UPDATE_DB (
@@ -176,12 +182,15 @@ workflow BACTRAIL_ADD {
         UPDATE_DB.out.status.collect()
     )
 
-    ch_versions = ch_versions.mix(DATABASE_VERIFY.out.version, FASTP.out.version, KRAKEN2.out.version, SPADES.out.version,
-        FILTER_CONTIGS.out.version, QUAST.out.version, BUSCO.out.version, FASTANI.out.version, POPPUNK_QUERY.out.version,
-        POPPUNK_ASSIGN.out.version, PROKKA.out.version, SNIPPY.out.version, UPDATE_DB.out.version)
+    // ch_versions = ch_versions.mix(DATABASE_VERIFY.out.version, FASTP.out.version, KRAKEN2.out.version, SPADES.out.version,
+    //     FILTER_CONTIGS.out.version, QUAST.out.version, BUSCO.out.version, FASTANI.out.version, POPPUNK_QUERY.out.version,
+    //     POPPUNK_ASSIGN.out.version, PROKKA.out.version, SNIPPY.out.version, UPDATE_DB.out.version)
 
-    ch_multiqc_files = ch_multiqc_files.mix(KRAKEN2.out.report.collect{it[1]}, FASTP.out.json.collect{it[1]},
-        QUAST.out.report_tsv.collect{it[1]}, BUSCO.out.busco.collect{it[1]}, SNIPPY.out.summary.collect{it[1]})
+    ch_versions = ch_versions.mix(DATABASE_VERIFY.out.version, FASTP.out.version, KRAKEN2.out.version, SPADES.out.version,
+        FILTER_CONTIGS.out.version, QUAST.out.version, BUSCO.out.version, FASTANI.out.version)
+
+    // ch_multiqc_files = ch_multiqc_files.mix(KRAKEN2.out.report.collect{it[1]}, FASTP.out.json.collect{it[1]},
+    //     QUAST.out.report_tsv.collect{it[1]}, BUSCO.out.busco.collect{it[1]}, SNIPPY.out.summary.collect{it[1]})
 
     //
     // Collate and save software versions

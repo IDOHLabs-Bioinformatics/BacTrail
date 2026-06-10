@@ -5,7 +5,8 @@ process SNIPPY {
     container "staphb/snippy:4.6.0"
 
     input:
-    tuple val(meta), path(reads), path(ref)
+    tuple val(meta), path(reads), val(ref)
+    path(reference_dir)
 
     output:
     tuple val(meta), path("${meta.id}_snippy"),       emit: results

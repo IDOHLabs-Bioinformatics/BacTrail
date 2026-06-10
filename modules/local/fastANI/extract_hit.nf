@@ -20,7 +20,7 @@ process EXTRACT_HIT {
     def args = task.ext.args ?: ''
     def prefix = task.ext.prefix ?: "${meta.id}"
     """
-    top_fastANI.py > output.txt
+    top_fastANI.py ${fastani} > output.txt
     ref=\$(head -n 1 output.txt)
     organism=\$(tail -n 1 output.txt)
 
