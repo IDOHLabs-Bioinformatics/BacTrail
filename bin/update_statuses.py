@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 import argparse
+import pandas as pd
 
 
 def parse():
@@ -14,10 +15,12 @@ def parse():
 if __name__ == '__main__':
     status = parse()
     status = status.split(', ')
-    print(status)
 
-    with open('insert_status.csv', 'w') as out:
-        out.write('Sample,Status\n')
-        for entry in status:
-            out.write(f'{entry}\n')
+    statuses = pd.DataFrame(columns=['Sample','Organism','Status','Cluster','Number of Other Isolates in the Cluster'])
+    for entry in status:
+        statuses.loc[len(statuses)] = entry.split(',')
+    
+    statuses['Number of Other Isolates in the Cluster'] = statuses.groupby(['Organism', 'Cluster'])['Number of Other Isolates in the Cluster'].transform('max')
+
+    statuses.to_csv('insert_status.csv', index=False)
 

@@ -94,7 +94,8 @@ if __name__ == '__main__':
                            (args.id, contents(args.assembly), contents(args.gff), contents(args.fasta), contents(args.vcf)))
             cursor.execute("INSERT INTO metadata VALUES (?, ?, ?, ?)",
                            (args.id, args.organism, cluster, args.collection_date))
-            print(f'{args.id},updated')
+            clusters = cursor.execute("SELECT cluster FROM metadata WHERE organism = ? AND cluster = ?", [args.organism, cluster]).fetchall()
+            print(f'{args.id},{args.organism},updated,{cluster},{len(clusters)}')
         except sqlite3.IntegrityError:
             if args.replace:
                 cluster = find_cluster_id(args.id, args.clusters)
@@ -102,9 +103,11 @@ if __name__ == '__main__':
                            (args.id, contents(args.assembly), contents(args.gff), contents(args.fasta), contents(args.vcf)))
                 cursor.execute("INSERT OR REPLACE INTO metadata VALUES (?, ?, ?, ?)",
                            (args.id, args.organism, cluster, args.collection_date))
-                print(f'{args.id},overwritten')
+                clusters = cursor.execute("SELECT cluster FROM metadata WHERE organism = ? AND cluster = ?", [args.organism, cluster]).fetchall()
+                print(f'{args.id},{args.organism},overwritten,{cluster},{len(clusters)}')
             else:
-                print(f'{args.id},not updated')
+                clusters = cursor.execute("SELECT cluster FROM metadata WHERE organism = ? AND cluster = ?", [args.organism, cluster]).fetchall()
+                print(f'{args.id},{args.organism},not updated,{cluster},{len(clusters)}')
 
         # insert reference genome if not present
         reference_insert(cursor, args.organism, contents(args.reference))
