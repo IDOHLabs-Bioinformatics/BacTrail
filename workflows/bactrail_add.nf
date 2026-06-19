@@ -14,7 +14,7 @@ include { KRAKEN2                } from '../modules/local/kraken/kraken2.nf'
 include { DATABASE_VERIFY        } from '../modules/local/database_verify.nf'
 include { POPPUNK_ASSIGN         } from '../modules/local/poppunk/poppunk_assign.nf'
 include { SNIPPY                 } from '../modules/local/snippy/snippy.nf'
-include { SPADES                 } from '../modules/local/spades/spades.nf'
+include { SHOVILL                } from '../modules/local/shovill/main.nf'
 include { FILTER_CONTIGS         } from '../modules/local/seqtk/main.nf'
 include { QUAST                  } from '../modules/local/quast/main.nf'
 include { BUSCO                  } from '../modules/local/busco/main.nf'
@@ -63,17 +63,18 @@ workflow BACTRAIL_ADD {
     )
 
     //
-    // MODULE: Spades
+    // MODULE: Shovill
     //
-    SPADES (
-        FASTP.out.trimmed
+    SHOVILL (
+        FASTP.out.trimmed,
+        params.depth
     )
 
     //
     // MODULE: Seqtk seq
     //
     FILTER_CONTIGS (
-        SPADES.out.assembly,
+        SHOVILL.out.assembly,
         params.min_contig_length
     )
 
@@ -105,9 +106,6 @@ workflow BACTRAIL_ADD {
         ch_reference_dir.first()
     )
 
-    EXTRACT_HIT.out.best_hit_ref.view()
-    EXTRACT_HIT.out.organism.view()
-
     // select unique organisms
     unique_organisms = EXTRACT_HIT.out.organism
         .map { meta, organism -> organism }
@@ -115,7 +113,6 @@ workflow BACTRAIL_ADD {
         .flatten()
         .unique()
 
-    unique_organisms.view()
 
     //
     // MODULE: Database verify
@@ -186,7 +183,7 @@ workflow BACTRAIL_ADD {
     //     FILTER_CONTIGS.out.version, QUAST.out.version, BUSCO.out.version, FASTANI.out.version, POPPUNK_QUERY.out.version,
     //     POPPUNK_ASSIGN.out.version, PROKKA.out.version, SNIPPY.out.version, UPDATE_DB.out.version)
 
-    ch_versions = ch_versions.mix(DATABASE_VERIFY.out.version, FASTP.out.version, KRAKEN2.out.version, SPADES.out.version,
+    ch_versions = ch_versions.mix(DATABASE_VERIFY.out.version, FASTP.out.version, KRAKEN2.out.version, SHOVILL.out.version,
         FILTER_CONTIGS.out.version, QUAST.out.version, BUSCO.out.version, FASTANI.out.version)
 
     // ch_multiqc_files = ch_multiqc_files.mix(KRAKEN2.out.report.collect{it[1]}, FASTP.out.json.collect{it[1]},

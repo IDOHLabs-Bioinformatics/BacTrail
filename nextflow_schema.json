@@ -129,6 +129,11 @@
                     "default": "any",
                     "pattern": "^[^,\\s]+(,[^,\\s]+)*$",
                     "description": "A comma separated list, with no spaces, of the sample IDs to query the database for."
+                },
+                "depth": {
+                    "type": "integer",
+                    "default": 150,
+                    "description": "The depth subsampled to during assembly."
                 }
             }
         },
