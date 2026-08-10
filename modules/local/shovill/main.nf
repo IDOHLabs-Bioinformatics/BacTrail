@@ -9,8 +9,8 @@ process SHOVILL {
     val(depth)
 
     output:
-    tuple val(meta), path("assembly/contigs.fa"), emit: assembly
-    path("version.yml"),                                    emit: version
+    tuple val(meta), path("assembly/${meta}.fa"), emit: assembly
+    path("version.yml"),                          emit: version
 
     when:
     task.ext.when == null || task.ext.when
@@ -25,6 +25,8 @@ process SHOVILL {
         --depth ${depth} \\
         --cpus ${task.cpus} \\
         --assembler spades
+
+    mv assembly/contigs.fa assembly/${meta.id}.fa
 
     cat << END_VERSIONS > version.yml
     "${task.process}":
