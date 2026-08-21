@@ -1,7 +1,7 @@
 # Introduction 
 <img src='docs/images/Benny_the_BacTrail_Detective.png' align="right" height="300">
 
-<p style="width: 1000px;">**BacTrail** is a pipeline that is designed to perform actively passive surviellance of bacterial pathogens, and is composed of 2 workflows, ADD and ANALYZE. The idea is to take sequenced isolates and run the ADD workflow, which places metadata, annotation, an assembly, an alignment, and importantly, a cluster group ID in a SQLite database for each isolate. The cluster ID can lets users quickly and automatically identify isolates that roughly similar, one can imagine a large family tree. The workflow, ANALYZE, can then utilize the knowledge of which isolates are already somewhat similar, and perform a fine-grained relatedness analysis identifying which, if any, of the isolates in large family tree are highly related. To return to the family tree, this is similar to identifying which are siblings from within the more diverse family tree.</p>
+<p style="width: 1000px;"><b>BacTrail</b> is a pipeline that is designed to perform actively passive surviellance of bacterial pathogens, and is composed of 2 workflows, ADD and ANALYZE. The idea is to take sequenced isolates and run the ADD workflow, which places metadata, annotation, an assembly, an alignment, and importantly, a cluster group ID in a SQLite database for each isolate. The cluster ID can lets users quickly and automatically identify isolates that roughly similar, one can imagine a large family tree. The workflow, ANALYZE, can then utilize the knowledge of which isolates are already somewhat similar, and perform a fine-grained relatedness analysis identifying which, if any, of the isolates in large family tree are highly related. To return to the family tree, this is similar to identifying which are siblings from within the more diverse family tree.</p>
 
 <h3>ADD Workflow</h3>
 <center>
@@ -20,26 +20,28 @@
 > [!NOTE]
 > If you are new to Nextflow and nf-core, please refer to [this page](https://nf-co.re/docs/usage/installation) on how to set-up Nextflow. Make sure to [test your setup](https://nf-co.re/docs/usage/introduction#how-to-run-a-pipeline) with `-profile test` before running the workflow on actual data.
 
-The two workflows in this pipeline are run independently of eachother, and the workflow chosen is dependent on the goal. If the user wants to add more isolates to the database, then the ADD workflow should be chosen. If the user wants to perform relatedness analysis on the isolates already present in the database, the ANALYZE workflow should be chosen. In order to run the ANALYZE workflow, the isolates <em>must</em> be present in the database first.
+The two workflows in this pipeline are run independently of each other, and the workflow chosen is dependent on the goal. If the user wants to add more isolates to the database, then the ADD workflow should be chosen. If the user wants to perform relatedness analysis on the isolates already present in the database, the ANALYZE workflow should be chosen. In order to run the ANALYZE workflow, the isolates <em>must</em> be present in the database first.
 
 <h3>ADD Workflow</h3>
 
 The add workflow requires the following parameters:
 ```
   - samplesheet
-    • csv file path, format described below
+    • csv file path, format described below.
   - outdir
-    • path for a diectory to hold the output
+    • Path for a diectory to hold the output.
   - db_name
-    • path to the database that will hold the isolate information, does not need to exist beforehand
+    • Path to the database that will hold the isolate information.
+  - bactrail_outdir
+    • Directory that contains the Bactrail database. This is required so that new data is written to it, and not to a new database in the output directory.
   - schema_dir
-    • path to a directory that contains popPUNK schemas
+    • Path to a directory that contains popPUNK schemas.
   - kraken2_db database path
-    • path to a Kraken2 database
+    • Path to a Kraken2 database.
   - reference_list
-    • text file containing the path to the reference genomes used with FastANI
+    • Text file containing the path to the reference genomes used with FastANI.
   - reference_dir
-    • directory containing the bacterial reference sequences to use with FastANI
+    • Directory containing the bacterial reference sequences to use with FastANI.
 ```
 An example samplesheet with the required columns are below.
 
@@ -76,12 +78,23 @@ The ADD workflow has 2 main output files. The first of these is the MultiQC repo
 The ANALYZE workflow requires the following parameters:
 ```
   - db_name
-    • path to the database that will hold the isolate information, does not need to exist beforehand
+    • Path to the database that holds the isolate information.
   - organism
-    • Which organism in the database to analyze
+    • Which organism in the database to analyze. The organism name should not include spaces, instead use an '_' character.
   - outdir
-    • path for a diectory to hold the output
+    • Path for a directory to hold the output.
 ```
+
+Additionally, one of the following options is can be used as filtering criteria for the isolates to be analyzed:
+```
+  - sample_list
+    • A comma separted list, with no spaces, of sample IDs in the database to query.
+  - collection_date_start and collection_date_end
+    • Provide a time frame of collection dates to analyze isolates between in MM-DD-YYYY format. Use both the collection_date_start and collection_date_end options.
+  - cluster
+    • Additional filtering option to analyze only a specific cluster that was determined in the ADD step.
+```
+
 The workflow is run with the command:
 ```
  nextflow run BacTrail \
@@ -89,6 +102,7 @@ The workflow is run with the command:
     --outdir results \
     --db_name bactrail.db \
     --organism [Klebsiella_pneumoniae/Escherichia_coli/...]
+    [optional filtering command(s)]
     -profile [docker/singularity]
 ```
 

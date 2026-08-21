@@ -9,7 +9,7 @@ process SHOVILL {
     val(depth)
 
     output:
-    tuple val(meta), path("assembly/${meta}.fa"), emit: assembly
+    tuple val(meta), path("assembly/${meta.id}.fa"), emit: assembly
     path("version.yml"),                          emit: version
 
     when:
@@ -44,6 +44,4 @@ process SHOVILL {
         shovill: \$(shovill -v | cut -d ' ' -f 2)
     END_VERSIONS
     """
-
-
 }
